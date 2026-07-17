@@ -29,6 +29,8 @@ interface RoleContextType {
   setShowContactos: (show: boolean) => void;
   showProtocolos: boolean;
   setShowProtocolos: (show: boolean) => void;
+  showGruposTuteados: boolean;
+  setShowGruposTuteados: (show: boolean) => void;
   // Estados de Emergencia
   isEmergenciaActiva: boolean;
   setIsEmergenciaActiva: (activa: boolean) => void;
@@ -111,6 +113,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [showReclamos, setShowReclamos] = useState(false);
   const [showContactos, setShowContactos] = useState(false);
   const [showProtocolos, setShowProtocolos] = useState(false);
+  const [showGruposTuteados, setShowGruposTuteados] = useState(false);
 
   // Estados de Emergencia
   const [isEmergenciaActiva, setIsEmergenciaActiva] = useState(false);
@@ -156,6 +159,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         setShowContactos,
         showProtocolos,
         setShowProtocolos,
+        showGruposTuteados,
+        setShowGruposTuteados,
         isEmergenciaActiva,
         setIsEmergenciaActiva,
         nombreProtocoloActivo,

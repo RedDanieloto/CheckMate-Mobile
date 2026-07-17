@@ -23,7 +23,7 @@ interface SidebarOption {
 }
 
 export default function Sidebar() {
-  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos, setShowContactos, setShowProtocolos } = useRole();
+  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos, setShowContactos, setShowProtocolos, setShowGruposTuteados } = useRole();
   const insets = useSafeAreaInsets();
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -184,7 +184,7 @@ export default function Sidebar() {
             label: 'Tus Grupos Tuteados',
             icon: 'school-outline',
             onPress: () => {
-              alert('Tus Grupos Tuteados presionado');
+              setShowGruposTuteados(true);
               setIsSidebarOpen(false);
             },
           },
