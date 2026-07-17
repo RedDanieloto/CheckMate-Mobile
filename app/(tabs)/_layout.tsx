@@ -4,6 +4,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { HapticTab } from '@/components/haptic-tab';
+import { useRole } from '@/context/RoleContext';
 
 interface TabIconProps {
   name: keyof typeof Ionicons.glyphMap;
@@ -21,6 +22,14 @@ const TabIcon = ({ name, focused, color }: TabIconProps) => {
 };
 
 export default function TabLayout() {
+  const { setShowSettings, setShowNotifications, setShowJustificantes } = useRole();
+
+  const resetGlobalScreens = () => {
+    setShowSettings(false);
+    setShowNotifications(false);
+    setShowJustificantes(false);
+  };
+
   return (
     <Tabs
       screenOptions={{
@@ -53,6 +62,9 @@ export default function TabLayout() {
             />
           ),
         }}
+        listeners={{
+          tabPress: resetGlobalScreens,
+        }}
       />
       <Tabs.Screen
         name="index"
@@ -66,6 +78,9 @@ export default function TabLayout() {
             />
           ),
         }}
+        listeners={{
+          tabPress: resetGlobalScreens,
+        }}
       />
       <Tabs.Screen
         name="profile"
@@ -78,6 +93,9 @@ export default function TabLayout() {
               color={color}
             />
           ),
+        }}
+        listeners={{
+          tabPress: resetGlobalScreens,
         }}
       />
     </Tabs>
