@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   Dimensions,
   Platform,
   Image,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,8 +25,45 @@ interface SidebarOption {
 export default function Sidebar() {
   const { isSidebarOpen, setIsSidebarOpen, role } = useRole();
   const insets = useSafeAreaInsets();
+  const [shouldRender, setShouldRender] = useState(false);
 
-  if (!isSidebarOpen) return null;
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+  const sidebarTranslateX = useRef(new Animated.Value(SIDEBAR_WIDTH)).current;
+
+  useEffect(() => {
+    if (isSidebarOpen) {
+      setShouldRender(true);
+      Animated.parallel([
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(sidebarTranslateX, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(backdropOpacity, {
+          toValue: 0,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+        Animated.timing(sidebarTranslateX, {
+          toValue: SIDEBAR_WIDTH,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShouldRender(false);
+      });
+    }
+  }, [isSidebarOpen]);
+
+  if (!shouldRender) return null;
 
   // Obtener opciones según el rol
   const getOptions = (currentRole: Role): SidebarOption[] => {
@@ -188,13 +226,28 @@ export default function Sidebar() {
   return (
     <View style={styles.overlayContainer}>
       {/* Backdrop presionable para cerrar el menú */}
-      <Pressable
-        style={styles.backdrop}
-        onPress={() => setIsSidebarOpen(false)}
-      />
+      <Animated.View
+        style={[
+          styles.backdrop,
+          {
+            opacity: backdropOpacity,
+          },
+        ]}
+      >
+        <Pressable style={styles.backdropPressable} onPress={() => setIsSidebarOpen(false)} />
+      </Animated.View>
 
       {/* Panel del Menú Lateral */}
-      <View style={[styles.sidebarPanel, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
+      <Animated.View
+        style={[
+          styles.sidebarPanel,
+          {
+            paddingTop: insets.top + 20,
+            paddingBottom: insets.bottom + 20,
+            transform: [{ translateX: sidebarTranslateX }],
+          },
+        ]}
+      >
         {/* Sección Logo superior */}
         <View style={styles.logoSection}>
           <Image
@@ -223,7 +276,7 @@ export default function Sidebar() {
 
         {/* Versión al pie del menú */}
         <Text style={styles.versionText}>CHECKMATE v0.1</Text>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -239,8 +292,13 @@ const styles = StyleSheet.create({
     zIndex: 10000, // Por encima de todo, incluido el selector global
   },
   backdrop: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  backdropPressable: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
   sidebarPanel: {
     width: SIDEBAR_WIDTH,
