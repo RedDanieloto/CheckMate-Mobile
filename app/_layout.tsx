@@ -18,6 +18,7 @@ import ContactosScreen from '@/components/screens/ContactosScreen';
 import ProtocolosScreen from '@/components/screens/ProtocolosScreen';
 import GruposTuteadosScreen from '@/components/screens/GruposTuteadosScreen';
 import ClasesProfesorScreen from '@/components/screens/ClasesProfesorScreen';
+import HistorialSiniestrosScreen from '@/components/screens/HistorialSiniestrosScreen';
 import EmergenciaEstudianteOverlay from '@/components/screens/EmergenciaEstudianteOverlay';
 import PaseListaEmergenciaOverlay from '@/components/screens/PaseListaEmergenciaOverlay';
 import AlertaBusquedaGlobal from '@/components/screens/AlertaBusquedaGlobal';
@@ -51,6 +52,7 @@ export default function RootLayout() {
             <ProtocolosScreen />
             <GruposTuteadosScreen />
             <ClasesProfesorScreen />
+            <HistorialSiniestrosScreen />
             <EmergenciaEstudianteOverlay />
             <PaseListaEmergenciaOverlay />
             <AlertaBusquedaGlobal />

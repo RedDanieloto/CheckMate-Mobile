@@ -33,6 +33,8 @@ interface RoleContextType {
   setShowGruposTuteados: (show: boolean) => void;
   showClasesProfesor: boolean;
   setShowClasesProfesor: (show: boolean) => void;
+  showHistorialSiniestros: boolean;
+  setShowHistorialSiniestros: (show: boolean) => void;
   // Estados de Emergencia
   isEmergenciaActiva: boolean;
   setIsEmergenciaActiva: (activa: boolean) => void;
@@ -117,6 +119,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [showProtocolos, setShowProtocolos] = useState(false);
   const [showGruposTuteados, setShowGruposTuteados] = useState(false);
   const [showClasesProfesor, setShowClasesProfesor] = useState(false);
+  const [showHistorialSiniestros, setShowHistorialSiniestros] = useState(false);
 
   // Estados de Emergencia
   const [isEmergenciaActiva, setIsEmergenciaActiva] = useState(false);
@@ -166,6 +169,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         setShowGruposTuteados,
         showClasesProfesor,
         setShowClasesProfesor,
+        showHistorialSiniestros,
+        setShowHistorialSiniestros,
         isEmergenciaActiva,
         setIsEmergenciaActiva,
         nombreProtocoloActivo,

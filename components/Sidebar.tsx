@@ -23,7 +23,7 @@ interface SidebarOption {
 }
 
 export default function Sidebar() {
-  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos, setShowContactos, setShowProtocolos, setShowGruposTuteados, setShowClasesProfesor } = useRole();
+  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos, setShowContactos, setShowProtocolos, setShowGruposTuteados, setShowClasesProfesor, setShowHistorialSiniestros } = useRole();
   const insets = useSafeAreaInsets();
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -125,7 +125,7 @@ export default function Sidebar() {
             label: 'Historial de Siniestros',
             icon: 'flame-outline',
             onPress: () => {
-              alert('Historial de Siniestros presionado');
+              setShowHistorialSiniestros(true);
               setIsSidebarOpen(false);
             },
           },
