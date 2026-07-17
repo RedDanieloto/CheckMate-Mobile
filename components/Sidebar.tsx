@@ -6,6 +6,7 @@ import {
   Pressable,
   Dimensions,
   Platform,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -196,10 +197,11 @@ export default function Sidebar() {
       <View style={[styles.sidebarPanel, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
         {/* Sección Logo superior */}
         <View style={styles.logoSection}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoTextCM}>CM</Text>
-          </View>
-          <Text style={styles.logoTitle}>CHECK MATE</Text>
+          <Image
+            source={require('../assets/CHECK MATE Logo (6).png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <View style={styles.logoDivider} />
         </View>
 
@@ -260,29 +262,10 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 20,
   },
-  logoCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 4,
-    borderColor: '#000000',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-  },
-  logoTextCM: {
-    fontSize: 36,
-    fontWeight: '900',
-    color: '#000000',
-    fontStyle: 'italic',
-    letterSpacing: -2,
-  },
-  logoTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginTop: 12,
-    letterSpacing: 1.5,
+  logoImage: {
+    width: 140,
+    height: 140,
+    marginTop: 10,
   },
   logoDivider: {
     width: '80%',
