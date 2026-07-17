@@ -9,6 +9,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import LoginScreen from '@/components/screens/LoginScreen';
 import { RoleProvider } from '@/context/RoleContext';
 import GlobalRoleSelector from '@/components/GlobalRoleSelector';
+import Sidebar from '@/components/Sidebar';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -30,6 +31,7 @@ export default function RootLayout() {
               <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
             </Stack>
             <GlobalRoleSelector />
+            <Sidebar />
           </View>
         )}
         <StatusBar style="auto" />

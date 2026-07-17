@@ -53,7 +53,7 @@ const FieldRow = ({ label, value, subValue, isLast }: FieldRowProps) => {
 };
 
 export default function ProfileScreen() {
-  const { role: currentRole } = useRole();
+  const { role: currentRole, setIsSidebarOpen } = useRole();
   const insets = useSafeAreaInsets();
 
   // Datos mock por rol
@@ -133,7 +133,7 @@ export default function ProfileScreen() {
         <View style={[styles.headerContainer, { paddingTop: insets.top }]}>
           {/* Botón de Menú */}
           <View style={styles.topRow}>
-            <Pressable style={styles.menuButton} onPress={() => alert('Menú presionado')}>
+            <Pressable style={styles.menuButton} onPress={() => setIsSidebarOpen(true)}>
               <Ionicons name="menu-outline" size={32} color="#000000" />
             </Pressable>
           </View>

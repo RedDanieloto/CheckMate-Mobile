@@ -6,20 +6,18 @@ import { useRole } from '@/context/RoleContext';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { role } = useRole();
+  const { role, setIsSidebarOpen } = useRole();
   const [showCredencial, setShowCredencial] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'qr'>('card');
 
-  // Si está en modo de ver credencial (y es estudiante)
   if (showCredencial && role === 'estudiante') {
     return (
       <View style={styles.container}>
-        {/* Header de Credencial con botón atrás y menú */}
         <View style={[styles.headerWithBack, { paddingTop: insets.top }]}>
           <Pressable style={styles.menuButtonLeft} onPress={() => { setShowCredencial(false); setViewMode('card'); }}>
             <Ionicons name="arrow-back-outline" size={32} color="#000000" />
           </Pressable>
-          <Pressable style={styles.menuButton} onPress={() => alert('Menú presionado')}>
+          <Pressable style={styles.menuButton} onPress={() => setIsSidebarOpen(true)}>
             <Ionicons name="menu-outline" size={36} color="#000000" />
           </Pressable>
         </View>
@@ -45,7 +43,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Header con botón de menú hamburguesa */}
       <View style={[styles.header, { paddingTop: insets.top }]}>
-        <Pressable style={styles.menuButton} onPress={() => alert('Menú presionado')}>
+        <Pressable style={styles.menuButton} onPress={() => setIsSidebarOpen(true)}>
           <Ionicons name="menu-outline" size={36} color="#000000" />
         </Pressable>
       </View>

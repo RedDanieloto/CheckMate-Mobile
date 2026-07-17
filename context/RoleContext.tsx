@@ -5,15 +5,18 @@ export type Role = 'estudiante' | 'administrador' | 'profesor_tutor' | 'profesor
 interface RoleContextType {
   role: Role;
   setRole: (role: Role) => void;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (isOpen: boolean) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>('estudiante');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <RoleContext.Provider value={{ role, setRole }}>
+    <RoleContext.Provider value={{ role, setRole, isSidebarOpen, setIsSidebarOpen }}>
       {children}
     </RoleContext.Provider>
   );
