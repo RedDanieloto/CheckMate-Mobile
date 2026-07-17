@@ -14,7 +14,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.container}>
         {/* Header de Credencial con botón atrás y menú */}
-        <View style={[styles.header, { paddingTop: insets.top }]}>
+        <View style={[styles.headerWithBack, { paddingTop: insets.top }]}>
           <Pressable style={styles.menuButtonLeft} onPress={() => setShowCredencial(false)}>
             <Ionicons name="arrow-back-outline" size={32} color="#000000" />
           </Pressable>
@@ -23,7 +23,7 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* Diseño de la Tarjeta Credencial */}
+        {/* Diseñó de la Tarjeta Credencial */}
         <View style={styles.credencialContent}>
           <Ionicons name="card" size={180} color="#000000" />
           <Text style={styles.studentName}>WALTER BROWN</Text>
@@ -81,9 +81,15 @@ const styles = StyleSheet.create({
     height: 100,
     alignItems: 'center',
   },
+  headerWithBack: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    height: 100,
+    alignItems: 'center',
+  },
   menuButtonLeft: {
-    position: 'absolute',
-    left: 24,
     justifyContent: 'center',
     alignItems: 'center',
     width: 48,
