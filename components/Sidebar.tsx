@@ -23,7 +23,7 @@ interface SidebarOption {
 }
 
 export default function Sidebar() {
-  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos, setShowContactos, setShowProtocolos, setShowGruposTuteados } = useRole();
+  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos, setShowContactos, setShowProtocolos, setShowGruposTuteados, setShowClasesProfesor } = useRole();
   const insets = useSafeAreaInsets();
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -203,7 +203,7 @@ export default function Sidebar() {
             label: 'Tus Grupos',
             icon: 'people-outline',
             onPress: () => {
-              alert('Tus Grupos presionado');
+              setShowClasesProfesor(true);
               setIsSidebarOpen(false);
             },
           },

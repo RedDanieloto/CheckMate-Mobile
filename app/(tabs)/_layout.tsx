@@ -22,7 +22,7 @@ const TabIcon = ({ name, focused, color }: TabIconProps) => {
 };
 
 export default function TabLayout() {
-  const { setShowSettings, setShowNotifications, setShowJustificantes, setShowReclamos, setShowContactos, setShowProtocolos, setShowGruposTuteados } = useRole();
+  const { setShowSettings, setShowNotifications, setShowJustificantes, setShowReclamos, setShowContactos, setShowProtocolos, setShowGruposTuteados, setShowClasesProfesor } = useRole();
 
   const resetGlobalScreens = () => {
     setShowSettings(false);
@@ -32,6 +32,7 @@ export default function TabLayout() {
     setShowContactos(false);
     setShowProtocolos(false);
     setShowGruposTuteados(false);
+    setShowClasesProfesor(false);
   };
 
   return (
