@@ -1,10 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRole } from '@/context/RoleContext';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const { role } = useRole();
 
   return (
     <View style={styles.container}>
@@ -21,6 +23,16 @@ export default function HomeScreen() {
           Bienvenido a{'\n'}CheckMate
         </Text>
       </View>
+
+      {/* Botón flotante para credencial de alumno (Solo rol estudiante) */}
+      {role === 'estudiante' && (
+        <View style={styles.credencialContainer}>
+          <Text style={styles.dotsText}>...</Text>
+          <Pressable style={styles.credencialButton} onPress={() => alert('Credencial presionado')}>
+            <Ionicons name="card-outline" size={36} color="#000000" />
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -49,7 +61,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
-    // Ajuste para compensar el offset del header y el bottom bar en el centrado
     marginTop: -80,
   },
   title: {
@@ -59,12 +70,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 42,
   },
-  bottomLabel: {
+  credencialContainer: {
     position: 'absolute',
-    bottom: 8,
-    left: 16,
-    fontSize: 12,
-    color: '#B0B4BA',
-    opacity: 0.5,
+    bottom: Platform.OS === 'ios' ? 170 : 150, // Posicionado encima del selector global flotante
+    alignSelf: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  dotsText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#7A22FF',
+    lineHeight: 18,
+    marginBottom: 4,
+    letterSpacing: 2,
+  },
+  credencialButton: {
+    borderRadius: 35,
+    width: 70,
+    height: 70,
+    backgroundColor: '#00BCFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
   },
 });
