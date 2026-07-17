@@ -12,6 +12,7 @@ import GlobalRoleSelector from '@/components/GlobalRoleSelector';
 import Sidebar from '@/components/Sidebar';
 import SettingsScreen from '@/components/screens/SettingsScreen';
 import NotificationsScreen from '@/components/screens/NotificationsScreen';
+import JustificantesScreen from '@/components/screens/JustificantesScreen';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -36,6 +37,7 @@ export default function RootLayout() {
             <Sidebar />
             <SettingsScreen />
             <NotificationsScreen />
+            <JustificantesScreen />
           </View>
         )}
         <StatusBar style="auto" />

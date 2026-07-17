@@ -11,6 +11,8 @@ interface RoleContextType {
   setShowSettings: (show: boolean) => void;
   showNotifications: boolean;
   setShowNotifications: (show: boolean) => void;
+  showJustificantes: boolean;
+  setShowJustificantes: (show: boolean) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -20,6 +22,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showJustificantes, setShowJustificantes] = useState(false);
 
   return (
     <RoleContext.Provider
@@ -32,6 +35,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         setShowSettings,
         showNotifications,
         setShowNotifications,
+        showJustificantes,
+        setShowJustificantes,
       }}
     >
       {children}

@@ -23,7 +23,7 @@ interface SidebarOption {
 }
 
 export default function Sidebar() {
-  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings } = useRole();
+  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes } = useRole();
   const insets = useSafeAreaInsets();
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -74,7 +74,7 @@ export default function Sidebar() {
             label: 'Historial de Justificaciones',
             icon: 'receipt-outline',
             onPress: () => {
-              alert('Historial de Justificaciones presionado');
+              setShowJustificantes(true);
               setIsSidebarOpen(false);
             },
           },
@@ -105,6 +105,14 @@ export default function Sidebar() {
         ];
       case 'administrador':
         return [
+          {
+            label: 'Historial de Justificaciones',
+            icon: 'document-text-outline',
+            onPress: () => {
+              setShowJustificantes(true);
+              setIsSidebarOpen(false);
+            },
+          },
           {
             label: 'Historial de Siniestros',
             icon: 'flame-outline',
@@ -176,7 +184,7 @@ export default function Sidebar() {
             label: 'Justificantes',
             icon: 'document-text-outline',
             onPress: () => {
-              alert('Justificantes presionado');
+              setShowJustificantes(true);
               setIsSidebarOpen(false);
             },
           },
