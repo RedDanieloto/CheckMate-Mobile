@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRole } from '@/context/RoleContext';
 
 type Role = 'estudiante' | 'administrador' | 'profesor_tutor' | 'profesor';
 
@@ -52,7 +53,7 @@ const FieldRow = ({ label, value, subValue, isLast }: FieldRowProps) => {
 };
 
 export default function ProfileScreen() {
-  const [currentRole, setCurrentRole] = useState<Role>('estudiante');
+  const { role: currentRole } = useRole();
   const insets = useSafeAreaInsets();
 
   // Datos mock por rol
@@ -137,29 +138,6 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-          {/* Selector de Rol Temporal */}
-          <View style={styles.roleSelectorContainer}>
-            {(['estudiante', 'administrador', 'profesor_tutor', 'profesor'] as Role[]).map((role) => (
-              <Pressable
-                key={role}
-                style={[
-                  styles.roleTab,
-                  currentRole === role && styles.roleTabActive,
-                ]}
-                onPress={() => setCurrentRole(role)}
-              >
-                <Text
-                  style={[
-                    styles.roleTabText,
-                    currentRole === role && styles.roleTabTextActive,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {role === 'profesor_tutor' ? 'Tutor' : role.charAt(0).toUpperCase() + role.slice(1, 5)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
 
           {/* Nombre y Avatar */}
           <View style={styles.profileHeaderContent}>

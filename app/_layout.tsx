@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { View } from 'react-native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -6,6 +7,8 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import LoginScreen from '@/components/screens/LoginScreen';
+import { RoleProvider } from '@/context/RoleContext';
+import GlobalRoleSelector from '@/components/GlobalRoleSelector';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -17,15 +20,20 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      {!isAuthenticated ? (
-        <LoginScreen onLogin={() => setIsAuthenticated(true)} />
-      ) : (
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-      )}
-      <StatusBar style="auto" />
+      <RoleProvider>
+        {!isAuthenticated ? (
+          <LoginScreen onLogin={() => setIsAuthenticated(true)} />
+        ) : (
+          <View style={{ flex: 1 }}>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+            </Stack>
+            <GlobalRoleSelector />
+          </View>
+        )}
+        <StatusBar style="auto" />
+      </RoleProvider>
     </ThemeProvider>
   );
 }
