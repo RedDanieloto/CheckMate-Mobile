@@ -10,7 +10,7 @@ export default function HomeScreen() {
   const [showCredencial, setShowCredencial] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'qr'>('card');
 
-  if (showCredencial && role === 'estudiante') {
+  if (showCredencial && (role === 'estudiante' || role === 'profesor' || role === 'profesor_tutor')) {
     return (
       <View style={styles.container}>
         <View style={[styles.headerWithBack, { paddingTop: insets.top }]}>
@@ -55,8 +55,8 @@ export default function HomeScreen() {
         </Text>
       </View>
 
-      {/* Botón flotante para credencial de alumno (Solo rol estudiante) */}
-      {role === 'estudiante' && (
+      {/* Botón flotante para credencial de alumno (Estudiante, Profesor y Tutor) */}
+      {(role === 'estudiante' || role === 'profesor' || role === 'profesor_tutor') && (
         <View style={styles.credencialContainer}>
           <Pressable style={styles.credencialButton} onPress={() => setShowCredencial(true)}>
             <Ionicons name="card-outline" size={36} color="#000000" />
