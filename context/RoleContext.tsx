@@ -9,6 +9,8 @@ interface RoleContextType {
   setIsSidebarOpen: (isOpen: boolean) => void;
   showSettings: boolean;
   setShowSettings: (show: boolean) => void;
+  showNotifications: boolean;
+  setShowNotifications: (show: boolean) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -17,6 +19,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>('estudiante');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   return (
     <RoleContext.Provider
@@ -27,6 +30,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         setIsSidebarOpen,
         showSettings,
         setShowSettings,
+        showNotifications,
+        setShowNotifications,
       }}
     >
       {children}

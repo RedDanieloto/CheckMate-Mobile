@@ -53,7 +53,7 @@ const FieldRow = ({ label, value, subValue, isLast }: FieldRowProps) => {
 };
 
 export default function ProfileScreen() {
-  const { role: currentRole, setIsSidebarOpen } = useRole();
+  const { role: currentRole, setIsSidebarOpen, setShowNotifications } = useRole();
   const insets = useSafeAreaInsets();
 
   // Datos mock por rol
@@ -131,8 +131,11 @@ export default function ProfileScreen() {
       >
         {/* Cabecera Blanca superior */}
         <View style={[styles.headerContainer, { paddingTop: insets.top }]}>
-          {/* Botón de Menú */}
+          {/* Botón de Menú y Notificaciones */}
           <View style={styles.topRow}>
+            <Pressable style={styles.notificationButton} onPress={() => setShowNotifications(true)}>
+              <Ionicons name="notifications-outline" size={32} color="#000000" />
+            </Pressable>
             <Pressable style={styles.menuButton} onPress={() => setIsSidebarOpen(true)}>
               <Ionicons name="menu-outline" size={32} color="#000000" />
             </Pressable>
@@ -202,7 +205,7 @@ const styles = StyleSheet.create({
   topRow: {
     width: '100%',
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     paddingHorizontal: 24,
     height: 48,
     alignItems: 'center',
@@ -368,5 +371,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff',
     marginTop: 8,
+  },
+    notificationButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 48,
+    height: 48,
   },
 });

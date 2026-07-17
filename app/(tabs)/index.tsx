@@ -6,10 +6,11 @@ import { useRole } from '@/context/RoleContext';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { role, setIsSidebarOpen } = useRole();
+  const { role, setIsSidebarOpen, setShowNotifications } = useRole();
   const [showCredencial, setShowCredencial] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'qr'>('card');
 
+  // Si está en modo de ver credencial (y es estudiante, profesor o tutor)
   if (showCredencial && (role === 'estudiante' || role === 'profesor' || role === 'profesor_tutor')) {
     return (
       <View style={styles.container}>
@@ -41,8 +42,11 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header con botón de menú hamburguesa */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
+      {/* Header con notificaciones a la izquierda y hamburguesa a la derecha */}
+      <View style={[styles.headerWithNotifications, { paddingTop: insets.top }]}>
+        <Pressable style={styles.notificationButton} onPress={() => setShowNotifications(true)}>
+          <Ionicons name="notifications-outline" size={32} color="#000000" />
+        </Pressable>
         <Pressable style={styles.menuButton} onPress={() => setIsSidebarOpen(true)}>
           <Ionicons name="menu-outline" size={36} color="#000000" />
         </Pressable>
@@ -88,6 +92,14 @@ const styles = StyleSheet.create({
     height: 100,
     alignItems: 'center',
   },
+  headerWithNotifications: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    height: 100,
+    alignItems: 'center',
+  },
   menuButtonLeft: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -95,6 +107,12 @@ const styles = StyleSheet.create({
     height: 48,
   },
   menuButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 48,
+    height: 48,
+  },
+  notificationButton: {
     justifyContent: 'center',
     alignItems: 'center',
     width: 48,
