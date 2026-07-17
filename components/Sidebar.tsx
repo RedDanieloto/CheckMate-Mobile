@@ -301,8 +301,11 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   sidebarPanel: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
     width: SIDEBAR_WIDTH,
-    height: '100%',
     backgroundColor: '#FAF9F9',
     borderTopLeftRadius: 36,
     borderBottomLeftRadius: 36,
