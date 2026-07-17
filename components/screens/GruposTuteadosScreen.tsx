@@ -281,19 +281,14 @@ export default function GruposTuteadosScreen() {
                 )}
               </ScrollView>
 
-              {/* Fila de Botones */}
+              {/* Botón de Enviar Correo */}
               <View style={styles.modalActionsRow}>
                 <Pressable
-                  style={styles.btnVerExpediente}
-                  onPress={() => Alert.alert('Expediente Escolar', `Redirigiendo al expediente completo de ${selectedAlumno?.nombre}`)}
-                >
-                  <Text style={styles.btnVerExpedienteText}>Ver Expediente</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.mailButton}
+                  style={styles.btnEnviarCorreo}
                   onPress={() => selectedAlumno && handleSendMail(selectedAlumno.email, selectedAlumno.nombre)}
                 >
-                  <Ionicons name="mail-outline" size={24} color="#000000" />
+                  <Ionicons name="mail-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
+                  <Text style={styles.btnEnviarCorreoText}>Enviar Correo</Text>
                 </Pressable>
               </View>
             </View>
@@ -586,32 +581,26 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   modalActionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
-  btnVerExpediente: {
-    flex: 1,
-    height: 48,
+  btnEnviarCorreo: {
+    width: '100%',
+    height: 50,
     backgroundColor: '#000000',
-    borderRadius: 12,
+    borderRadius: 14,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  btnVerExpedienteText: {
+  btnEnviarCorreoText: {
     color: '#ffffff',
     fontSize: 14,
     fontWeight: 'bold',
-  },
-  mailButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
