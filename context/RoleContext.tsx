@@ -7,6 +7,8 @@ interface RoleContextType {
   setRole: (role: Role) => void;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (isOpen: boolean) => void;
+  showSettings: boolean;
+  setShowSettings: (show: boolean) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -14,9 +16,19 @@ const RoleContext = createContext<RoleContextType | undefined>(undefined);
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>('estudiante');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   return (
-    <RoleContext.Provider value={{ role, setRole, isSidebarOpen, setIsSidebarOpen }}>
+    <RoleContext.Provider
+      value={{
+        role,
+        setRole,
+        isSidebarOpen,
+        setIsSidebarOpen,
+        showSettings,
+        setShowSettings,
+      }}
+    >
       {children}
     </RoleContext.Provider>
   );

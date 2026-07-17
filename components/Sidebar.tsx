@@ -23,7 +23,7 @@ interface SidebarOption {
 }
 
 export default function Sidebar() {
-  const { isSidebarOpen, setIsSidebarOpen, role } = useRole();
+  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings } = useRole();
   const insets = useSafeAreaInsets();
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -98,7 +98,7 @@ export default function Sidebar() {
             label: 'Ajustes de la APP',
             icon: 'settings-outline',
             onPress: () => {
-              alert('Ajustes presionado');
+              setShowSettings(true);
               setIsSidebarOpen(false);
             },
           },
@@ -125,7 +125,7 @@ export default function Sidebar() {
             label: 'Ajustes de la APP',
             icon: 'settings-outline',
             onPress: () => {
-              alert('Ajustes presionado');
+              setShowSettings(true);
               setIsSidebarOpen(false);
             },
           },
@@ -160,7 +160,7 @@ export default function Sidebar() {
             label: 'Ajustes de la APP',
             icon: 'settings-outline',
             onPress: () => {
-              alert('Ajustes presionado');
+              setShowSettings(true);
               setIsSidebarOpen(false);
             },
           },
@@ -211,7 +211,7 @@ export default function Sidebar() {
             label: 'Ajustes de la APP',
             icon: 'settings-outline',
             onPress: () => {
-              alert('Ajustes presionado');
+              setShowSettings(true);
               setIsSidebarOpen(false);
             },
           },
