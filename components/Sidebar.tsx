@@ -23,7 +23,7 @@ interface SidebarOption {
 }
 
 export default function Sidebar() {
-  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos, setShowContactos } = useRole();
+  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos, setShowContactos, setShowProtocolos } = useRole();
   const insets = useSafeAreaInsets();
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -133,7 +133,7 @@ export default function Sidebar() {
             label: 'Protocolos de Seguridad',
             icon: 'shield-checkmark-outline',
             onPress: () => {
-              alert('Protocolos de Seguridad presionado');
+              setShowProtocolos(true);
               setIsSidebarOpen(false);
             },
           },
@@ -168,7 +168,7 @@ export default function Sidebar() {
             label: 'Protocolos de Seguridad',
             icon: 'shield-checkmark-outline',
             onPress: () => {
-              alert('Protocolos de Seguridad presionado');
+              setShowProtocolos(true);
               setIsSidebarOpen(false);
             },
           },
@@ -211,7 +211,7 @@ export default function Sidebar() {
             label: 'Protocolos de Seguridad',
             icon: 'shield-checkmark-outline',
             onPress: () => {
-              alert('Protocolos de Seguridad presionado');
+              setShowProtocolos(true);
               setIsSidebarOpen(false);
             },
           },
