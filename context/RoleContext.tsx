@@ -13,6 +13,8 @@ interface RoleContextType {
   setShowNotifications: (show: boolean) => void;
   showJustificantes: boolean;
   setShowJustificantes: (show: boolean) => void;
+  showReclamos: boolean;
+  setShowReclamos: (show: boolean) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -23,6 +25,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showJustificantes, setShowJustificantes] = useState(false);
+  const [showReclamos, setShowReclamos] = useState(false);
 
   return (
     <RoleContext.Provider
@@ -37,6 +40,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         setShowNotifications,
         showJustificantes,
         setShowJustificantes,
+        showReclamos,
+        setShowReclamos,
       }}
     >
       {children}

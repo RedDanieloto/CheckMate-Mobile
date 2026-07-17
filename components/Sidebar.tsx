@@ -23,7 +23,7 @@ interface SidebarOption {
 }
 
 export default function Sidebar() {
-  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes } = useRole();
+  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos } = useRole();
   const insets = useSafeAreaInsets();
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -82,7 +82,7 @@ export default function Sidebar() {
             label: 'Tus Reclamos',
             icon: 'chatbubble-ellipses-outline',
             onPress: () => {
-              alert('Tus Reclamos presionado');
+              setShowReclamos(true);
               setIsSidebarOpen(false);
             },
           },
@@ -110,6 +110,14 @@ export default function Sidebar() {
             icon: 'document-text-outline',
             onPress: () => {
               setShowJustificantes(true);
+              setIsSidebarOpen(false);
+            },
+          },
+          {
+            label: 'Reclamos',
+            icon: 'alert-circle-outline',
+            onPress: () => {
+              setShowReclamos(true);
               setIsSidebarOpen(false);
             },
           },
@@ -144,7 +152,7 @@ export default function Sidebar() {
             label: 'Reclamos',
             icon: 'alert-circle-outline',
             onPress: () => {
-              alert('Reclamos presionado');
+              setShowReclamos(true);
               setIsSidebarOpen(false);
             },
           },
@@ -191,14 +199,6 @@ export default function Sidebar() {
         ];
       case 'profesor':
         return [
-          {
-            label: 'Reclamos',
-            icon: 'alert-circle-outline',
-            onPress: () => {
-              alert('Reclamos presionado');
-              setIsSidebarOpen(false);
-            },
-          },
           {
             label: 'Tus Grupos',
             icon: 'people-outline',
