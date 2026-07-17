@@ -20,6 +20,7 @@ interface Alumno {
   matricula: string;
   email: string;
   estadoAcademico: 'REGULAR' | 'CONDICIONAL';
+  porcentajeAsistencia: number;
   incidencias: {
     materia: string;
     tipo: 'Inasistencia justificada' | 'Inasistencia injustificada';
@@ -58,6 +59,7 @@ export default function GruposTuteadosScreen() {
           matricula: '23170049',
           email: 'j.papito@uttcampus.edu.mx',
           estadoAcademico: 'REGULAR',
+          porcentajeAsistencia: 94,
           incidencias: [
             { materia: 'Falta en ingles', tipo: 'Inasistencia justificada', fecha: '20-06-2026' },
             { materia: 'Falta en ingles', tipo: 'Inasistencia injustificada', fecha: '19-06-2026' },
@@ -69,6 +71,7 @@ export default function GruposTuteadosScreen() {
           matricula: '23170052',
           email: 'm.garcia@uttcampus.edu.mx',
           estadoAcademico: 'REGULAR',
+          porcentajeAsistencia: 98,
           incidencias: [
             { materia: 'Dispositivos Inteligentes', tipo: 'Inasistencia justificada', fecha: '12-06-2026' },
           ],
@@ -79,6 +82,7 @@ export default function GruposTuteadosScreen() {
           matricula: '23170088',
           email: 'c.mendez@uttcampus.edu.mx',
           estadoAcademico: 'CONDICIONAL',
+          porcentajeAsistencia: 82,
           incidencias: [
             { materia: 'Programación Móvil', tipo: 'Inasistencia injustificada', fecha: '15-06-2026' },
             { materia: 'Programación Móvil', tipo: 'Inasistencia injustificada', fecha: '10-06-2026' },
@@ -91,6 +95,7 @@ export default function GruposTuteadosScreen() {
           matricula: '23170102',
           email: 'a.solis@uttcampus.edu.mx',
           estadoAcademico: 'REGULAR',
+          porcentajeAsistencia: 100,
           incidencias: [],
         },
         {
@@ -99,6 +104,7 @@ export default function GruposTuteadosScreen() {
           matricula: '23170115',
           email: 'r.ruiz@uttcampus.edu.mx',
           estadoAcademico: 'REGULAR',
+          porcentajeAsistencia: 95,
           incidencias: [
             { materia: 'Inglés', tipo: 'Inasistencia justificada', fecha: '02-06-2026' },
           ],
@@ -109,6 +115,7 @@ export default function GruposTuteadosScreen() {
           matricula: '23170129',
           email: 'e.castro@uttcampus.edu.mx',
           estadoAcademico: 'REGULAR',
+          porcentajeAsistencia: 99,
           incidencias: [],
         },
       ],
@@ -203,13 +210,6 @@ export default function GruposTuteadosScreen() {
                 <Ionicons name="chevron-forward-outline" size={20} color="#9CA3AF" />
               </Pressable>
             ))}
-
-            <Pressable
-              style={styles.btnVerTodos}
-              onPress={() => Alert.alert('Alumnos', 'Mostrando la lista completa del grupo 9A')}
-            >
-              <Text style={styles.btnVerTodosText}>Ver todos</Text>
-            </Pressable>
           </ScrollView>
         </>
       )}
@@ -245,11 +245,17 @@ export default function GruposTuteadosScreen() {
 
             {/* Contenido Blanco del Modal */}
             <View style={styles.modalBody}>
-              {/* Estado Académico */}
+              {/* Estado Académico y Asistencia */}
               <View style={styles.estadoRow}>
-                <Text style={styles.bodyLabel}>Estado Académico</Text>
-                <View style={styles.tagRegular}>
-                  <Text style={styles.tagRegularText}>{selectedAlumno?.estadoAcademico}</Text>
+                <View>
+                  <Text style={styles.bodyLabel}>Estado Académico</Text>
+                  <View style={[styles.tagRegular, { marginTop: 4 }]}>
+                    <Text style={styles.tagRegularText}>{selectedAlumno?.estadoAcademico}</Text>
+                  </View>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={styles.bodyLabel}>Asistencia Total</Text>
+                  <Text style={styles.asistenciaPorcentaje}>{selectedAlumno?.porcentajeAsistencia}%</Text>
                 </View>
               </View>
 
@@ -446,10 +452,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
   },
   modalContent: {
-    width: '100%',
+    width: '95%',
     backgroundColor: '#ffffff',
     borderRadius: 24,
     overflow: 'hidden',
@@ -462,7 +468,7 @@ const styles = StyleSheet.create({
   modalHeaderDark: {
     backgroundColor: '#000000',
     paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingTop: 20,
     paddingBottom: 24,
     alignItems: 'center',
   },
@@ -530,6 +536,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
+  asistenciaPorcentaje: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#111E38',
+    marginTop: 4,
+  },
   incidenciasHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -541,7 +553,7 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   incidenciasScroll: {
-    maxHeight: 140,
+    maxHeight: 220,
     marginBottom: 20,
   },
   incidenciaRow: {
