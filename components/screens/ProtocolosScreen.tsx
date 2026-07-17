@@ -101,7 +101,7 @@ interface Protocolo {
 }
 
 export default function ProtocolosScreen() {
-  const { showProtocolos, setShowProtocolos } = useRole();
+  const { showProtocolos, setShowProtocolos, setIsEmergenciaActiva, setNombreProtocoloActivo } = useRole();
   const insets = useSafeAreaInsets();
   const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(true);
 
@@ -171,6 +171,9 @@ export default function ProtocolosScreen() {
   ];
 
   const handleActivarProtocolo = (titulo: string) => {
+    setIsEmergenciaActiva(true);
+    setNombreProtocoloActivo(titulo);
+    setShowProtocolos(false); // Ocultar la pantalla de selección para mostrar el pase de lista/emergencia
     Alert.alert(
       'Protocolo Activado',
       `La alerta de "${titulo}" ha sido transmitida de inmediato al Centro de Coordinación y a las brigadas de emergencia del campus.\n\nPor favor, mantén la calma y sigue las instrucciones del personal oficial.`,

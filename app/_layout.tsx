@@ -16,6 +16,9 @@ import JustificantesScreen from '@/components/screens/JustificantesScreen';
 import ReclamosScreen from '@/components/screens/ReclamosScreen';
 import ContactosScreen from '@/components/screens/ContactosScreen';
 import ProtocolosScreen from '@/components/screens/ProtocolosScreen';
+import EmergenciaEstudianteOverlay from '@/components/screens/EmergenciaEstudianteOverlay';
+import PaseListaEmergenciaOverlay from '@/components/screens/PaseListaEmergenciaOverlay';
+import AlertaBusquedaGlobal from '@/components/screens/AlertaBusquedaGlobal';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -44,6 +47,9 @@ export default function RootLayout() {
             <ReclamosScreen />
             <ContactosScreen />
             <ProtocolosScreen />
+            <EmergenciaEstudianteOverlay />
+            <PaseListaEmergenciaOverlay />
+            <AlertaBusquedaGlobal />
           </View>
         )}
         <StatusBar style="auto" />
