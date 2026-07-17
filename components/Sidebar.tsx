@@ -23,7 +23,7 @@ interface SidebarOption {
 }
 
 export default function Sidebar() {
-  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos } = useRole();
+  const { isSidebarOpen, setIsSidebarOpen, role, setShowSettings, setShowJustificantes, setShowReclamos, setShowContactos } = useRole();
   const insets = useSafeAreaInsets();
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -90,7 +90,7 @@ export default function Sidebar() {
             label: 'Contactos',
             icon: 'people-outline',
             onPress: () => {
-              alert('Contactos presionado');
+              setShowContactos(true);
               setIsSidebarOpen(false);
             },
           },
