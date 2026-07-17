@@ -8,6 +8,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { role } = useRole();
   const [showCredencial, setShowCredencial] = useState(false);
+  const [viewMode, setViewMode] = useState<'card' | 'qr'>('card');
 
   // Si está en modo de ver credencial (y es estudiante)
   if (showCredencial && role === 'estudiante') {
@@ -15,7 +16,7 @@ export default function HomeScreen() {
       <View style={styles.container}>
         {/* Header de Credencial con botón atrás y menú */}
         <View style={[styles.headerWithBack, { paddingTop: insets.top }]}>
-          <Pressable style={styles.menuButtonLeft} onPress={() => setShowCredencial(false)}>
+          <Pressable style={styles.menuButtonLeft} onPress={() => { setShowCredencial(false); setViewMode('card'); }}>
             <Ionicons name="arrow-back-outline" size={32} color="#000000" />
           </Pressable>
           <Pressable style={styles.menuButton} onPress={() => alert('Menú presionado')}>
@@ -23,17 +24,17 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* Diseñó de la Tarjeta Credencial */}
+        {/* Diseñó de la Tarjeta Credencial / Código QR */}
         <View style={styles.credencialContent}>
-          <Ionicons name="card" size={180} color="#000000" />
+          <Ionicons name={viewMode === 'card' ? 'card' : 'qr-code'} size={180} color="#000000" />
           <Text style={styles.studentName}>WALTER BROWN</Text>
           <Text style={styles.studentGroup}>1° "A"</Text>
         </View>
 
-        {/* Botón flotante para código QR (template) */}
+        {/* Botón flotante para alternar entre credencial y código QR */}
         <View style={styles.qrContainer}>
-          <Pressable style={styles.qrButton} onPress={() => alert('Código QR presionado')}>
-            <Ionicons name="qr-code-outline" size={36} color="#000000" />
+          <Pressable style={styles.qrButton} onPress={() => setViewMode(viewMode === 'card' ? 'qr' : 'card')}>
+            <Ionicons name={viewMode === 'card' ? 'qr-code-outline' : 'card-outline'} size={36} color="#000000" />
           </Pressable>
         </View>
       </View>
@@ -60,7 +61,7 @@ export default function HomeScreen() {
       {role === 'estudiante' && (
         <View style={styles.credencialContainer}>
           <Pressable style={styles.credencialButton} onPress={() => setShowCredencial(true)}>
-            <Ionicons name="id-card-outline" size={36} color="#000000" />
+            <Ionicons name="card-outline" size={36} color="#000000" />
           </Pressable>
         </View>
       )}
