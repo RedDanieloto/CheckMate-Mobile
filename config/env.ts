@@ -1,3 +1,6 @@
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+
 /**
  * Configuración de Entornos para CheckMate API
  * 
@@ -5,14 +8,27 @@
  * Modifica `IS_DEV` a true o false.
  */
 
-// Alternar entre entorno local (dev) y producción (prod)
 export const IS_DEV = true;
 
-// URLs base de la API
-// Para desarrollo en dispositivo físico o emulador:
-// - Android Emulator: 'http://10.0.2.2:8000/api/v1'
-// - iOS Simulator / Web / Localhost: 'http://localhost:8000/api/v1'
-const DEV_BASE_URL = 'http://10.0.2.2:8000/api/v1';
+// Obtener la IP dinámica de la máquina local (útil para celulares físicos con Expo Go)
+const getLocalDevUrl = (): string => {
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (hostUri) {
+    const ip = hostUri.split(':')[0];
+    if (ip) {
+      return `http://${ip}:8000/api/v1`;
+    }
+  }
+
+  // Fallback según plataforma
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:8000/api/v1';
+  }
+
+  return 'http://localhost:8000/api/v1';
+};
+
+const DEV_BASE_URL = getLocalDevUrl();
 const PROD_BASE_URL = 'https://api.checkmate.org/api/v1';
 
 export const ENV_CONFIG = {
@@ -28,3 +44,4 @@ export const ENDPOINTS = {
     REGISTER_USER: '/auth/users',
   },
 } as const;
+

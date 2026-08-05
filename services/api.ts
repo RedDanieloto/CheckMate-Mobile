@@ -38,14 +38,19 @@ class ApiClient {
       url += `?${searchParams.toString()}`;
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), ENV_CONFIG.timeoutMs);
+
     const config: RequestInit = {
       method: options.method || 'GET',
       headers: this.getHeaders(headers),
+      signal: controller.signal,
       ...customConfig,
     };
 
     try {
       const response = await fetch(url, config);
+      clearTimeout(timeoutId);
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
@@ -58,8 +63,12 @@ class ApiClient {
 
       return data as T;
     } catch (error: any) {
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error(`No se pudo conectar con el servidor (${ENV_CONFIG.baseUrl}). Verifica tu conexión o que la API local esté ejecutándose.`);
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error(`Tiempo de espera agotado (${ENV_CONFIG.timeoutMs / 1000}s) al conectar con ${ENV_CONFIG.baseUrl}. Revisa que la API esté respondiendo.`);
+      }
+      if (error.name === 'TypeError' || error.message?.includes('fetch')) {
+        throw new Error(`No se pudo conectar con la API en ${ENV_CONFIG.baseUrl}.\n\nSi estás usando dispositivo físico, ejecuta el backend con:\nphp artisan serve --host=0.0.0.0`);
       }
       throw error;
     }

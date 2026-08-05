@@ -11,24 +11,47 @@ import {
   ScrollView,
   StatusBar,
   Dimensions,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { authService } from '@/services/authService';
 
 interface LoginScreenProps {
   onLogin: () => void;
 }
 
 export default function LoginScreen({ onLogin }: LoginScreenProps) {
-  const [matricula, setMatricula] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
 
-  const handleLogin = () => {
-    if (matricula.trim() && password.trim()) {
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Atención', 'Por favor, ingresa tu correo electrónico y contraseña.');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      await authService.login({
+        email: email.trim(),
+        password: password,
+        device_name: 'checkmate-mobile',
+      });
+
       onLogin();
-    } else {
-      alert('Por favor, ingresa tu matrícula y contraseña.');
+    } catch (error: any) {
+      const msg = error?.message || 'Error al conectar con la API de autenticación.';
+      setErrorMessage(msg);
+      Alert.alert('Error de inicio de sesión', msg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -55,19 +78,28 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         {/* Tarjeta de Formulario de Login */}
         <View style={styles.formContainer}>
           <Text style={styles.title}>Bienvenido</Text>
-          <Text style={styles.subtitle}>Ingresa tus datos para continuar. </Text>
+          <Text style={styles.subtitle}>Ingresa tus datos para continuar.</Text>
 
-          {/* Input de Matrícula */}
+          {errorMessage ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle-outline" size={18} color="#D32F2F" />
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
+
+          {/* Input de Correo / Matrícula */}
           <View style={styles.inputWrapper}>
-            <Ionicons name="person-outline" size={20} color="#60646C" style={styles.inputIcon} />
+            <Ionicons name="mail-outline" size={20} color="#60646C" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Matricula"
+              placeholder="Correo electrónico"
               placeholderTextColor="#B0B4BA"
-              value={matricula}
-              onChangeText={setMatricula}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              editable={!isLoading}
             />
           </View>
 
@@ -83,12 +115,21 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
+              editable={!isLoading}
             />
           </View>
 
           {/* Botón Iniciar Sesión */}
-          <Pressable style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+          <Pressable
+            style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#ffffff" size="small" />
+            ) : (
+              <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+            )}
           </Pressable>
         </View>
       </ScrollView>
@@ -158,8 +199,27 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#60646C',
-    marginBottom: 32,
+    marginBottom: 24,
     textAlign: 'center',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFEBEE',
+    borderWidth: 1,
+    borderColor: '#FFCDD2',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 16,
+    width: '100%',
+    maxWidth: 340,
+  },
+  errorText: {
+    color: '#D32F2F',
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -198,9 +258,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  loginButtonDisabled: {
+    backgroundColor: '#666666',
+    opacity: 0.8,
+  },
   loginButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
 });
+
