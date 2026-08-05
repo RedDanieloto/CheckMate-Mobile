@@ -17,6 +17,11 @@ export interface LoginResponse {
   access_token?: string;
   user?: User;
   message?: string;
+  data?: {
+    token?: string;
+    access_token?: string;
+    user?: User;
+  };
   [key: string]: any;
 }
 

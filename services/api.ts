@@ -54,6 +54,9 @@ class ApiClient {
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setAuthToken(null);
+        }
         const errorMsg = data.message || `Error HTTP: ${response.status}`;
         const error = new Error(errorMsg) as Error & { status: number; data: any };
         error.status = response.status;

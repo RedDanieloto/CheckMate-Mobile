@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,10 +7,18 @@ import {
   Pressable,
   Platform,
   Dimensions,
+  ActivityIndicator,
+  RefreshControl,
+  Image,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { useRole } from '@/context/RoleContext';
+import { studentService } from '@/services/studentService';
+import { StudentProfile } from '@/types/student';
 
 type Role = 'estudiante' | 'administrador' | 'profesor_tutor' | 'profesor';
 
@@ -56,24 +64,116 @@ export default function ProfileScreen() {
   const { role: currentRole, setIsSidebarOpen, setShowNotifications } = useRole();
   const insets = useSafeAreaInsets();
 
-  // Datos mock por rol
-  const roleData: Record<Role, RoleInfo> = {
-    estudiante: {
-      name: 'WALTER BROWN JR',
+  const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null);
+  const [profilePhotoUri, setProfilePhotoUri] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const fetchProfile = useCallback(async () => {
+    if (currentRole !== 'estudiante') return;
+    setIsLoading(true);
+    try {
+      const data = await studentService.getProfile();
+      if (data && (data.first_name || data.email)) {
+        setStudentProfile(data);
+        if (data.photo && (data.photo.startsWith('http') || data.photo.startsWith('file'))) {
+          setProfilePhotoUri(data.photo);
+        }
+      }
+    } catch (error) {
+      console.warn('Error al cargar perfil de la API:', error);
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
+  }, [currentRole]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [fetchProfile])
+  );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProfile();
+  };
+
+  const handlePickImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permiso requerido', 'Se requiere acceso a la galería para cambiar tu foto de perfil.');
+        return;
+      }
+
+      const pickerResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets[0]?.uri) {
+        setProfilePhotoUri(pickerResult.assets[0].uri);
+      }
+    } catch (error) {
+      console.warn('Error al seleccionar la imagen:', error);
+    }
+  };
+
+  // Construir información dinámica si viene de la API de Alumno
+  const buildStudentDataFromApi = (profile: StudentProfile): RoleInfo => {
+    const fullName = [profile.first_name, profile.second_name, profile.first_surname, profile.second_surname]
+      .filter(Boolean)
+      .join(' ')
+      .toUpperCase();
+
+    const grupoText = profile.group
+      ? `${profile.group.grade}° "${profile.group.section}"`
+      : 'Sin grupo';
+
+    const carreraText = profile.career?.name || 'Sin carrera';
+
+    return {
+      name: fullName,
       avatar: '👨‍🎓',
       fields: [
-        { label: 'MATRICULA', value: '23170049' },
-        { label: 'GRUPO', value: '1° "A"' },
-        { label: 'TUTOR', value: 'Igmar Salazar', subValue: 'igmar.salazar@uttcampus.edu.mx' },
-        { label: 'TUTOR ASIGNADO', value: 'Walter B.', isLast: true },
+        { label: 'CORREO', value: profile.email },
+        { label: 'GRUPO', value: grupoText },
+        { label: 'CARRERA', value: carreraText },
+        { label: 'TELÉFONO', value: profile.phone || 'No registrado' },
+        { label: 'FECHA NAC.', value: profile.birth_date || 'No registrada', isLast: true },
       ],
       stats: {
         leftLabel: 'Faltas en Total',
-        leftValue: '2',
-        rightLabel: 'Porcentaje de Asistencias',
-        rightValue: '98%',
+        leftValue: '0',
+        rightLabel: 'Asistencia General',
+        rightValue: '100%',
       },
-    },
+    };
+  };
+
+  // Datos mock por rol (fallback)
+  const roleData: Record<Role, RoleInfo> = {
+    estudiante: studentProfile
+      ? buildStudentDataFromApi(studentProfile)
+      : {
+          name: 'WALTER BROWN JR',
+          avatar: '👨‍🎓',
+          fields: [
+            { label: 'MATRICULA', value: '23170049' },
+            { label: 'GRUPO', value: '1° "A"' },
+            { label: 'TUTOR', value: 'Igmar Salazar', subValue: 'igmar.salazar@uttcampus.edu.mx' },
+            { label: 'TUTOR ASIGNADO', value: 'Walter B.', isLast: true },
+          ],
+          stats: {
+            leftLabel: 'Faltas en Total',
+            leftValue: '2',
+            rightLabel: 'Porcentaje de Asistencias',
+            rightValue: '98%',
+          },
+        },
     administrador: {
       name: 'DIEGO MARADONA',
       avatar: '👨‍💼',
@@ -127,7 +227,10 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
-        bounces={false}
+        bounces={true}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#000000" />
+        }
       >
         {/* Cabecera Blanca superior */}
         <View style={[styles.headerContainer, { paddingTop: insets.top }]}>
@@ -141,13 +244,23 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-
           {/* Nombre y Avatar */}
           <View style={styles.profileHeaderContent}>
-            <Text style={styles.userName}>{data.name}</Text>
-            <View style={styles.avatarWrapper}>
-              <Text style={styles.avatarEmoji}>{data.avatar}</Text>
-            </View>
+            {isLoading && !studentProfile ? (
+              <ActivityIndicator size="small" color="#000000" style={{ marginBottom: 16 }} />
+            ) : (
+              <Text style={styles.userName}>{data.name}</Text>
+            )}
+            <Pressable style={styles.avatarWrapper} onPress={handlePickImage}>
+              {profilePhotoUri ? (
+                <Image source={{ uri: profilePhotoUri }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarEmoji}>{data.avatar}</Text>
+              )}
+              <View style={styles.cameraBadge}>
+                <Ionicons name="camera" size={18} color="#ffffff" />
+              </View>
+            </Pressable>
           </View>
         </View>
 
@@ -157,7 +270,7 @@ export default function ProfileScreen() {
           <View style={styles.infoCard}>
             {data.fields.map((field, idx) => (
               <FieldRow
-                key={field.label}
+                key={`${field.label}-${idx}`}
                 label={field.label}
                 value={field.value}
                 subValue={field.subValue}
@@ -277,6 +390,29 @@ const styles = StyleSheet.create({
   },
   avatarEmoji: {
     fontSize: 80,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 75,
+  },
+  cameraBadge: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: '#000000',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#ffffff',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
   detailsContainer: {
     flex: 1,

@@ -43,5 +43,12 @@ export const ENDPOINTS = {
     LOGIN: '/auth/login',
     REGISTER_USER: '/auth/users',
   },
+  ALUMNO: {
+    PROFILE: '/alumno/profile',
+    CLAIMS: '/alumno/claims',
+    JUSTIFICATIONS: '/alumno/justifications',
+    SUBJECTS: '/alumno/subjects',
+  },
 } as const;
+
 

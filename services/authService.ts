@@ -16,8 +16,13 @@ export const authService = {
 
     const response = await apiClient.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, payload);
 
-    // Si la respuesta incluye token, lo asignamos automáticamente al cliente HTTP
-    const token = response.token || response.access_token;
+    // Extraer token considerando respuesta directa o envuelta en { data: { token: "..." } }
+    const token =
+      (response as any)?.data?.token ||
+      (response as any)?.data?.access_token ||
+      response.token ||
+      response.access_token;
+
     if (token) {
       setAuthToken(token);
     }
