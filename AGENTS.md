@@ -164,3 +164,10 @@ Prioriza siempre:
 7. Uso eficiente de tokens.
 
 No sobreingenierices soluciones simples.
+
+## Git y Commits
+
+* Categorizar los commits según el tipo de cambio (ej. `feat:`, `fix:`, `refactor:`, `style:`, `docs:`).
+* No agregar comentarios innecesarios en el código (solo comentarios cortos y concisos si es estrictamente necesario).
+* Cuando el usuario indique "subir", generar el commit con una explicación clara en español de lo realizado.
+
