@@ -15,17 +15,21 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 import { useRole, Role } from '../../context/RoleContext';
+import { studentService } from '@/services/studentService';
+import { SubjectItem, SubjectDetail, AttendanceRecord } from '@/types/subject';
 
 interface CalendarDay {
   dayName: string;
   dayNumber: string;
   month: string;
-  fullDate: string; // Identificador en formato AAAA-MM-DD
+  fullDate: string;
 }
 
 interface ClassItem {
   id: string;
+  subjectId?: number;
   time: string;
   title: string;
   location: string;
@@ -40,17 +44,21 @@ export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
   const { role } = useRole();
 
-  // Fecha base inicial (3 de junio de 2026 para coincidir con el mockup inicial por defecto)
-  const [baseDate, setBaseDate] = useState<Date>(new Date('2026-06-03T12:00:00'));
-  const [selectedDate, setSelectedDate] = useState<string>('2026-06-03');
+  const [baseDate, setBaseDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
-  // Estados para los modales
+  // Estados para los modales y datos de la API
   const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
+  const [apiSubjects, setApiSubjects] = useState<SubjectItem[]>([]);
+  const [subjectDetail, setSubjectDetail] = useState<SubjectDetail | null>(null);
+  const [attendanceHistory, setAttendanceHistory] = useState<AttendanceRecord[]>([]);
 
-  // Estados para simular el envío del justificante
+  // Estados para envío del justificante
   const [justificanteAdjunto, setJustificanteAdjunto] = useState<string | null>(null);
+  const [justificanteFileUri, setJustificanteFileUri] = useState<string | null>(null);
   const [mensajeJustificante, setMensajeJustificante] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Estados para el buscador de fecha modal
   const [searchDay, setSearchDay] = useState('03');
@@ -132,37 +140,95 @@ export default function CalendarScreen() {
     setIsSearchModalVisible(false);
   };
 
-  // Simular la carga de un archivo justificante
-  const handleAdjuntarJustificante = () => {
+  // Cargar materias reales de la API para estudiantes
+  useEffect(() => {
+    if (role === 'estudiante') {
+      studentService.getSubjects()
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setApiSubjects(data);
+          }
+        })
+        .catch(err => console.warn('Error al cargar materias:', err));
+    }
+  }, [role]);
+
+  // Selección interactiva de archivo justificante mediante expo-image-picker
+  const handleAdjuntarJustificante = async () => {
     if (justificanteAdjunto) {
-      // Si ya hay uno, lo removemos
       setJustificanteAdjunto(null);
-    } else {
-      // Simulamos que cargó un pdf
-      setJustificanteAdjunto('justificante_medico_imss.pdf');
+      setJustificanteFileUri(null);
+      return;
+    }
+
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permiso requerido', 'Se requiere acceso a la galería para adjuntar tu justificante.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]?.uri) {
+        const asset = result.assets[0];
+        setJustificanteFileUri(asset.uri);
+        setJustificanteAdjunto(asset.fileName || 'evidencia_justificante.jpg');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo seleccionar el archivo de evidencia.');
     }
   };
 
-  // Simular envío de justificante
-  const handleEnviarJustificante = () => {
-    if (!justificanteAdjunto) {
-      Alert.alert('Archivo Requerido', 'Por favor, adjunta un documento de justificante antes de enviar.');
+  // Envío real de justificante a la API de CheckMate
+  const handleEnviarJustificante = async () => {
+    if (!mensajeJustificante.trim()) {
+      Alert.alert('Motivo Requerido', 'Por favor, escribe el motivo de la inasistencia.');
       return;
     }
-    Alert.alert(
-      'Justificante Enviado',
-      'Tu justificante y mensaje han sido enviados con éxito para la revisión del profesor tutor.',
-      [
-        {
-          text: 'Entendido',
-          onPress: () => {
-            setJustificanteAdjunto(null);
-            setMensajeJustificante('');
-            setSelectedClass(null);
+
+    if (!selectedClass || !selectedClass.subjectId) {
+      Alert.alert('Error', 'No se especificó la materia para el justificante.');
+      return;
+    }
+
+    // Buscar si hay un registro de falta que se pueda justificar en el historial
+    const targetAttendance = attendanceHistory.find(a => a.justifiable || a.status === 'FALTA');
+    const attendanceId = targetAttendance ? targetAttendance.attendance_id : 1;
+
+    setIsSubmitting(true);
+    try {
+      await studentService.submitJustification(
+        selectedClass.subjectId,
+        attendanceId,
+        mensajeJustificante.trim(),
+        justificanteFileUri || undefined
+      );
+
+      Alert.alert(
+        'Justificante Enviado',
+        'Tu solicitud de justificante ha sido registrada con éxito en la API de CheckMate.',
+        [
+          {
+            text: 'Entendido',
+            onPress: () => {
+              setJustificanteAdjunto(null);
+              setJustificanteFileUri(null);
+              setMensajeJustificante('');
+              setSelectedClass(null);
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    } catch (error: any) {
+      Alert.alert('Error al enviar justificante', error?.message || 'No se pudo registrar la solicitud.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Datos mock de clases por rol y fecha

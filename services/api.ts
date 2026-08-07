@@ -89,6 +89,25 @@ class ApiClient {
     });
   }
 
+  postFormData<T>(endpoint: string, formData: FormData, options?: RequestOptions): Promise<T> {
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+    };
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      headers: {
+        ...headers,
+        ...options?.headers,
+      },
+      body: formData,
+    });
+  }
+
   put<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
