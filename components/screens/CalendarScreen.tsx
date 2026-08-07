@@ -44,7 +44,7 @@ interface ClassItem {
 
 export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
-  const { role } = useRole();
+  const { role, userProfile } = useRole();
 
   const [baseDate, setBaseDate] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -264,7 +264,7 @@ export default function CalendarScreen() {
         location: 'Aula Asignada',
         status: idx === 2 ? 'absent' : idx === 3 ? 'pending' : 'completed',
         profesor: item.teacher?.full_name || 'Profesor Asignado',
-        correo: 'docente@checkmate.edu.mx',
+        correo: item.teacher?.email || 'profesor@checkmate.test',
         agendaText: item.schedule || 'Horario Asignado',
       }));
     }
@@ -277,8 +277,8 @@ export default function CalendarScreen() {
         title: `${item.subject_name || 'Materia'} (${item.group_name || 'Grupo'})`,
         location: formatClassroom(item.classroom),
         status: item.session_open ? 'completed' : 'pending',
-        profesor: 'Docente (Tú)',
-        correo: 'profesor@checkmate.edu.mx',
+        profesor: userProfile?.name ? `${userProfile.name} (Tú)` : 'Docente (Tú)',
+        correo: userProfile?.email || 'teacher@checkmate.test',
         agendaText: `${item.day || 'LUNES'} • ${item.start_time || '07:00'} - ${item.end_time || '09:00'}`,
       }));
     }

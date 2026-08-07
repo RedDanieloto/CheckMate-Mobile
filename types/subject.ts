@@ -1,6 +1,7 @@
 export interface SubjectTeacher {
   id: number;
   full_name: string;
+  email?: string;
   photo?: string;
 }
 
