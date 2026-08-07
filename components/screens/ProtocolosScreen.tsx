@@ -170,6 +170,14 @@ export default function ProtocolosScreen() {
     },
   ];
 
+  const getIncidentType = (t: string): 'FIRE' | 'GAS' | 'EARTHQUAKE' | 'OTHER' => {
+    const upper = t.toUpperCase();
+    if (upper.includes('INCENDIO')) return 'FIRE';
+    if (upper.includes('FUGA') || upper.includes('GAS')) return 'GAS';
+    if (upper.includes('TERREMOTO') || upper.includes('SISMO')) return 'EARTHQUAKE';
+    return 'OTHER';
+  };
+
   const handleActivarProtocolo = async (titulo: string) => {
     setIsEmergenciaActiva(true);
     setNombreProtocoloActivo(titulo);
@@ -178,9 +186,9 @@ export default function ProtocolosScreen() {
     try {
       await teacherService.createIncident({
         title: `EMERGENCIA: ${titulo}`,
-        description: `Protocolo de seguridad "${titulo}" activado desde la aplicación móvil.`,
+        description: `Protocolo de seguridad "${titulo}" activado desde la aplicación móvil por el docente.`,
         severity: titulo.includes('INCENDIO') || titulo.includes('TERREMOTO') ? 'CRITICA' : 'ALTA',
-        type: titulo,
+        type: getIncidentType(titulo),
       });
     } catch (err) {
       console.warn('Error al registrar incidente en la API:', err);
