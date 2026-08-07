@@ -197,6 +197,30 @@ export default function ClasesProfesorScreen() {
 
   const activeClasesList = apiClases.length > 0 ? apiClases : clasesProfesor;
 
+  const handleSelectAlumno = async (student: AlumnoClase) => {
+    setSelectedAlumno(student);
+    if (!isNaN(Number(student.id))) {
+      try {
+        const [detail, attendance, justifications] = await Promise.all([
+          teacherService.getStudentDetail(Number(student.id)),
+          teacherService.getStudentAttendance(Number(student.id)),
+          teacherService.getStudentJustifications(Number(student.id)),
+        ]);
+        setSelectedAlumno(prev => prev ? ({
+          ...prev,
+          nombre: detail.full_name || prev.nombre,
+          email: detail.email || prev.email,
+          incidencias: Array.isArray(justifications) ? justifications.map(j => ({
+            tipo: j.status === 'APROBADO' ? 'Inasistencia justificada' : 'Inasistencia injustificada',
+            fecha: j.created_at ? j.created_at.split('T')[0] : 'Hoy',
+          })) : prev.incidencias,
+        }) : prev);
+      } catch (err) {
+        console.warn('Error al obtener expediente de alumno:', err);
+      }
+    }
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Cabecera */}
@@ -249,7 +273,7 @@ export default function ClasesProfesorScreen() {
               <Pressable
                 key={student.id}
                 style={styles.alumnoCard}
-                onPress={() => setSelectedAlumno(student)}
+                onPress={() => handleSelectAlumno(student)}
               >
                 <View style={styles.alumnoCardLeft}>
                   {/* Foto de perfil / Avatar */}
