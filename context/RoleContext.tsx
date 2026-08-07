@@ -15,6 +15,8 @@ export interface EstudianteEmergencia {
 interface RoleContextType {
   role: Role;
   setRole: (role: Role) => void;
+  userProfile: { name?: string; email?: string } | null;
+  setUserProfile: (user: { name?: string; email?: string } | null) => void;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (isOpen: boolean) => void;
   showSettings: boolean;
@@ -110,6 +112,7 @@ const estudiantesIniciales: EstudianteEmergencia[] = [
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>('estudiante');
+  const [userProfile, setUserProfile] = useState<{ name?: string; email?: string } | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -151,6 +154,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       value={{
         role,
         setRole,
+        userProfile,
+        setUserProfile,
         isSidebarOpen,
         setIsSidebarOpen,
         showSettings,

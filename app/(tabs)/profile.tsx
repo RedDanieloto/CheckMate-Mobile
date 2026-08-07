@@ -61,7 +61,7 @@ const FieldRow = ({ label, value, subValue, isLast }: FieldRowProps) => {
 };
 
 export default function ProfileScreen() {
-  const { role: currentRole, setIsSidebarOpen, setShowNotifications } = useRole();
+  const { role: currentRole, userProfile, setIsSidebarOpen, setShowNotifications } = useRole();
   const insets = useSafeAreaInsets();
 
   const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null);
@@ -174,10 +174,10 @@ export default function ProfileScreen() {
           },
         },
     administrador: {
-      name: 'DIEGO MARADONA',
+      name: userProfile?.name?.toUpperCase() || 'ADMINISTRADOR',
       avatar: '👨‍💼',
       fields: [
-        { label: 'MATRICULA', value: '23170049' },
+        { label: 'CORREO', value: userProfile?.email || 'admin@checkmate.test' },
         { label: 'INSTITUCION', value: 'UTT', isLast: true },
       ],
       stats: {
@@ -188,13 +188,13 @@ export default function ProfileScreen() {
       },
     },
     profesor_tutor: {
-      name: 'DIEGO MARADONA',
+      name: userProfile?.name?.toUpperCase() || 'PROFESOR TUTOR',
       avatar: '👨‍🏫',
       fields: [
-        { label: 'MATRICULA', value: '23170049' },
+        { label: 'CORREO', value: userProfile?.email || 'tutor@checkmate.test' },
         { label: 'INSTITUCION', value: 'UTT' },
-        { label: 'GRUPO TUTADO', value: '9no "A"' },
-        { label: 'JEFA DIRECTA', value: 'Maria Becerra', isLast: true },
+        { label: 'GRUPO TUTADO', value: '1° "A"' },
+        { label: 'ROL', value: 'Profesor y Tutor', isLast: true },
       ],
       stats: {
         leftLabel: 'Alumnos Tutados',
@@ -204,12 +204,12 @@ export default function ProfileScreen() {
       },
     },
     profesor: {
-      name: 'DIEGO MARADONA',
+      name: userProfile?.name?.toUpperCase() || 'CARLOS RAMIREZ LOPEZ',
       avatar: '👨‍🏫',
       fields: [
-        { label: 'MATRICULA', value: '23170049' },
+        { label: 'CORREO', value: userProfile?.email || 'teacher@checkmate.test' },
         { label: 'INSTITUCION', value: 'UTT' },
-        { label: 'JEFA DIRECTA', value: 'Maria Becerra', isLast: true },
+        { label: 'ROL', value: 'Profesor Docente', isLast: true },
       ],
       stats: {
         leftLabel: 'Grupos Asignados',

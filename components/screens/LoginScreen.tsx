@@ -29,7 +29,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { setRole } = useRole();
+  const { setRole, setUserProfile } = useRole();
   const insets = useSafeAreaInsets();
 
   const handleLogin = async () => {
@@ -48,8 +48,16 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         device_name: 'checkmate-mobile',
       });
 
-      // Asignar el rol del usuario automáticamente en el contexto
-      const userRole = (response as any)?.data?.user?.role || response.user?.role;
+      // Asignar el rol y datos del usuario automáticamente en el contexto
+      const userData = (response as any)?.data?.user || response.user;
+      if (userData) {
+        setUserProfile({
+          name: userData.name || userData.full_name,
+          email: userData.email,
+        });
+      }
+
+      const userRole = userData?.role;
       if (userRole === 'alumno' || userRole === 'estudiante') {
         setRole('estudiante');
       } else if (userRole === 'administrator' || userRole === 'career_director') {

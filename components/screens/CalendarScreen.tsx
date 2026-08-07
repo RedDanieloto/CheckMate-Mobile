@@ -242,6 +242,15 @@ export default function CalendarScreen() {
     }
   };
 
+  const formatClassroom = (classroom: any): string => {
+    if (!classroom) return 'Aula Asignada';
+    if (typeof classroom === 'string') return classroom;
+    if (typeof classroom === 'object') {
+      return [classroom.name, classroom.building].filter(Boolean).join(' • ') || 'Aula Asignada';
+    }
+    return String(classroom);
+  };
+
   // Clases reales o mock según el rol y la fecha
   const getClasses = (currentRole: Role, date: string): ClassItem[] => {
     if (currentRole === 'administrador') return [];
@@ -264,13 +273,13 @@ export default function CalendarScreen() {
       return teacherSchedule.map(item => ({
         id: String(item.schedule_id),
         subjectId: item.subject_id,
-        time: `${item.start_time} - ${item.end_time}`,
-        title: `${item.subject_name} (${item.group_name})`,
-        location: item.classroom || 'Aula Asignada',
+        time: `${item.start_time || '07:00'} - ${item.end_time || '09:00'}`,
+        title: `${item.subject_name || 'Materia'} (${item.group_name || 'Grupo'})`,
+        location: formatClassroom(item.classroom),
         status: item.session_open ? 'completed' : 'pending',
         profesor: 'Docente (Tú)',
         correo: 'profesor@checkmate.edu.mx',
-        agendaText: `${item.day} • ${item.start_time} - ${item.end_time}`,
+        agendaText: `${item.day || 'LUNES'} • ${item.start_time || '07:00'} - ${item.end_time || '09:00'}`,
       }));
     }
 
