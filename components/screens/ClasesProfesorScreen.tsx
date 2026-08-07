@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,10 +9,12 @@ import {
   Modal,
   Alert,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRole } from '../../context/RoleContext';
+import { teacherService } from '@/services/teacherService';
 
 interface AlumnoClase {
   id: string;
@@ -20,7 +22,7 @@ interface AlumnoClase {
   matricula: string;
   email: string;
   estadoAcademico: 'REGULAR' | 'CONDICIONAL';
-  porcentajeAsistencia: number; // Porcentaje de asistencia en la materia del profesor
+  porcentajeAsistencia: number;
   incidencias: {
     tipo: 'Inasistencia justificada' | 'Inasistencia injustificada';
     fecha: string;
@@ -29,6 +31,7 @@ interface AlumnoClase {
 
 interface ClaseAsignada {
   id: string;
+  rawId?: number;
   grupo: string;
   materia: string;
   alumnos: AlumnoClase[];
@@ -41,9 +44,60 @@ export default function ClasesProfesorScreen() {
   const [viewState, setViewState] = useState<'clases' | 'alumnos'>('clases');
   const [selectedClase, setSelectedClase] = useState<ClaseAsignada | null>(null);
   const [selectedAlumno, setSelectedAlumno] = useState<AlumnoClase | null>(null);
+  const [apiClases, setApiClases] = useState<ClaseAsignada[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Exclusión del módulo para roles que no sean el profesor ordinario
-  if (!showClasesProfesor || role !== 'profesor') return null;
+  useEffect(() => {
+    if (showClasesProfesor && (role === 'profesor' || role === 'profesor_tutor')) {
+      setIsLoading(true);
+      teacherService.getGroups()
+        .then(groups => {
+          if (Array.isArray(groups) && groups.length > 0) {
+            const mapped: ClaseAsignada[] = groups.map(g => ({
+              id: String(g.id),
+              rawId: g.id,
+              grupo: `${g.grade}° "${g.section}"`,
+              materia: g.career_name || 'Asignatura Impartida',
+              alumnos: [],
+            }));
+            setApiClases(mapped);
+          }
+        })
+        .catch(err => console.warn('Error al obtener clases del profesor:', err))
+        .finally(() => setIsLoading(false));
+    }
+  }, [showClasesProfesor, role]);
+
+  const handleSelectClase = async (clase: ClaseAsignada) => {
+    setSelectedClase(clase);
+    setViewState('alumnos');
+
+    if (clase.rawId) {
+      try {
+        const students = await teacherService.getGroupStudents(clase.rawId);
+        if (Array.isArray(students)) {
+          const mappedStudents: AlumnoClase[] = students.map(s => ({
+            id: String(s.id),
+            nombre: s.full_name || [s.first_name, s.first_surname].join(' '),
+            matricula: `MAT-${s.id}`,
+            email: s.email,
+            estadoAcademico: 'REGULAR',
+            porcentajeAsistencia: 95,
+            incidencias: [],
+          }));
+          setSelectedClase({
+            ...clase,
+            alumnos: mappedStudents,
+          });
+        }
+      } catch (err) {
+        console.warn('Error al obtener alumnos de la clase:', err);
+      }
+    }
+  };
+
+  // Exclusión del módulo para roles que no sean el profesor ordinario o tutor
+  if (!showClasesProfesor || (role !== 'profesor' && role !== 'profesor_tutor')) return null;
 
   // Datos mock de los grupos y materias que imparte el profesor ordinario
   const clasesProfesor: ClaseAsignada[] = [
@@ -134,17 +188,14 @@ export default function ClasesProfesorScreen() {
     }
   };
 
-  const handleSelectClase = (clase: ClaseAsignada) => {
-    setSelectedClase(clase);
-    setViewState('alumnos');
-  };
-
   const handleSendMail = (email: string, name: string) => {
     const url = `mailto:${email}?subject=Reporte de Asistencias - CheckMate`;
     Linking.openURL(url).catch(() => {
       Alert.alert('Error', 'No se pudo redirigir al cliente de correo.');
     });
   };
+
+  const activeClasesList = apiClases.length > 0 ? apiClases : clasesProfesor;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -165,7 +216,7 @@ export default function ClasesProfesorScreen() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {clasesProfesor.map((item) => (
+            {activeClasesList.map((item) => (
               <Pressable
                 key={item.id}
                 style={styles.card}

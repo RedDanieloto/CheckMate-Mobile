@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,10 +9,12 @@ import {
   Modal,
   Alert,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRole } from '../../context/RoleContext';
+import { teacherService } from '@/services/teacherService';
 
 interface Alumno {
   id: string;
@@ -30,6 +32,7 @@ interface Alumno {
 
 interface Grupo {
   id: string;
+  rawId?: number;
   nombre: string;
   carrera: string;
   alumnos: Alumno[];
@@ -42,9 +45,60 @@ export default function GruposTuteadosScreen() {
   const [viewState, setViewState] = useState<'grupos' | 'alumnos'>('grupos');
   const [selectedGrupo, setSelectedGrupo] = useState<Grupo | null>(null);
   const [selectedAlumno, setSelectedAlumno] = useState<Alumno | null>(null);
+  const [apiGroups, setApiGroups] = useState<Grupo[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Exclusión del módulo para roles que no sean el tutor
-  if (!showGruposTuteados || role !== 'profesor_tutor') return null;
+  useEffect(() => {
+    if (showGruposTuteados && (role === 'profesor_tutor' || role === 'profesor')) {
+      setIsLoading(true);
+      teacherService.getGroups()
+        .then(groups => {
+          if (Array.isArray(groups) && groups.length > 0) {
+            const mapped: Grupo[] = groups.map(g => ({
+              id: String(g.id),
+              rawId: g.id,
+              nombre: `${g.grade}° "${g.section}"`,
+              carrera: g.career_name || 'Tecnologías de la Información',
+              alumnos: [],
+            }));
+            setApiGroups(mapped);
+          }
+        })
+        .catch(err => console.warn('Error al obtener grupos:', err))
+        .finally(() => setIsLoading(false));
+    }
+  }, [showGruposTuteados, role]);
+
+  const handleSelectGrupo = async (grupo: Grupo) => {
+    setSelectedGrupo(grupo);
+    setViewState('alumnos');
+
+    if (grupo.rawId) {
+      try {
+        const students = await teacherService.getGroupStudents(grupo.rawId);
+        if (Array.isArray(students)) {
+          const mappedStudents: Alumno[] = students.map(s => ({
+            id: String(s.id),
+            nombre: s.full_name || [s.first_name, s.first_surname].join(' '),
+            matricula: `MAT-${s.id}`,
+            email: s.email,
+            estadoAcademico: 'REGULAR',
+            porcentajeAsistencia: 95,
+            incidencias: [],
+          }));
+          setSelectedGrupo({
+            ...grupo,
+            alumnos: mappedStudents,
+          });
+        }
+      } catch (err) {
+        console.warn('Error al obtener estudiantes del grupo:', err);
+      }
+    }
+  };
+
+  // Exclusión del módulo para roles que no sean el tutor o profesor
+  if (!showGruposTuteados || (role !== 'profesor_tutor' && role !== 'profesor')) return null;
 
   // Datos mock de los grupos tuteados del profesor tutor
   const gruposTuteados: Grupo[] = [
@@ -131,17 +185,14 @@ export default function GruposTuteadosScreen() {
     }
   };
 
-  const handleSelectGrupo = (grupo: Grupo) => {
-    setSelectedGrupo(grupo);
-    setViewState('alumnos');
-  };
-
   const handleSendMail = (email: string, name: string) => {
     const url = `mailto:${email}?subject=Reporte de Asistencias - CheckMate`;
     Linking.openURL(url).catch(() => {
       Alert.alert('Error', 'No se pudo redirigir al cliente de correo.');
     });
   };
+
+  const activeGroupsList = apiGroups.length > 0 ? apiGroups : gruposTuteados;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -162,7 +213,7 @@ export default function GruposTuteadosScreen() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {gruposTuteados.map((item) => (
+            {activeGroupsList.map((item) => (
               <Pressable
                 key={item.id}
                 style={styles.card}
