@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRole, EstudianteEmergencia } from '../../context/RoleContext';
+import { teacherService } from '@/services/teacherService';
 
 interface GrupoAdmin {
   id: string;
@@ -28,6 +29,7 @@ export default function PaseListaEmergenciaOverlay() {
     isEmergenciaActiva,
     role,
     estudiantesEmergencia,
+    setEstudiantesEmergencia,
     marcarEstudianteASalvo,
     marcarEstudianteEnBusqueda,
     setAlertaBusqueda,
@@ -36,10 +38,47 @@ export default function PaseListaEmergenciaOverlay() {
   const insets = useSafeAreaInsets();
 
   const [selectedStudent, setSelectedStudent] = useState<EstudianteEmergencia | null>(null);
+  const [activeIncidentId, setActiveIncidentId] = useState<number | null>(null);
   
   // Estado local para la navegación del administrador durante la emergencia
   const [adminViewState, setAdminViewState] = useState<'grupos' | 'detalle_grupo' | 'desactivar_protocolo'>('grupos');
-  const [selectedGrupoNombre, setSelectedGrupoNombre] = useState<string>('9A');
+  const [selectedGrupoNombre, setSelectedGrupoNombre] = useState<string>('1A');
+
+  // Cargar grupos y alumnos reales de la API cuando la emergencia se activa
+  useEffect(() => {
+    if (isEmergenciaActiva) {
+      // 1. Obtener o consultar incidente activo
+      teacherService.getActiveIncidents()
+        .then(incidents => {
+          if (Array.isArray(incidents) && incidents.length > 0) {
+            setActiveIncidentId(incidents[0].id);
+          }
+        })
+        .catch(err => console.warn('Error al obtener incidentes activos:', err));
+
+      // 2. Obtener grupos y alumnos reales
+      teacherService.getGroups()
+        .then(async (groups) => {
+          if (Array.isArray(groups) && groups.length > 0) {
+            setSelectedGrupoNombre(`${groups[0].grade}${groups[0].section}`);
+            const students = await teacherService.getGroupStudents(groups[0].id);
+            if (Array.isArray(students) && students.length > 0) {
+              const mapped: EstudianteEmergencia[] = students.map((s, idx) => ({
+                id: String(s.id),
+                nombre: s.full_name || [s.first_name, s.first_surname].join(' '),
+                matricula: `MAT-${s.id}`,
+                estado: idx < 2 ? 'a_salvo' : 'pendiente',
+                horaUltimaVez: '10:00 AM',
+                zonaRegistro: 'Campus General',
+                foto: '',
+              }));
+              setEstudiantesEmergencia(mapped);
+            }
+          }
+        })
+        .catch(err => console.warn('Error al cargar alumnos de emergencia:', err));
+    }
+  }, [isEmergenciaActiva]);
 
   // Animación del slider de desactivación
   const pan = useRef(new Animated.ValueXY()).current;
@@ -122,9 +161,20 @@ export default function PaseListaEmergenciaOverlay() {
     },
   ];
 
-  const handleMarcarManualASalvo = (student: EstudianteEmergencia) => {
+  const handleMarcarManualASalvo = async (student: EstudianteEmergencia) => {
     marcarEstudianteASalvo(student.id);
     setSelectedStudent(null);
+
+    if (activeIncidentId && !isNaN(Number(student.id))) {
+      try {
+        await teacherService.updateIncidentStudents(activeIncidentId, [
+          { student_id: Number(student.id), present: true }
+        ]);
+      } catch (err) {
+        console.warn('Error al actualizar lista rápida en la API:', err);
+      }
+    }
+
     Alert.alert('Estatus Actualizado', `Se ha marcado a ${student.nombre} como "A Salvo" de forma manual.`);
   };
 

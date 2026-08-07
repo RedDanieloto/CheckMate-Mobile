@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRole } from '../../context/RoleContext';
+import { teacherService } from '@/services/teacherService';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_CONTAINER_WIDTH = SCREEN_WIDTH - 80; // Ancho disponible de la tarjeta
@@ -170,10 +171,22 @@ export default function ProtocolosScreen() {
     },
   ];
 
-  const handleActivarProtocolo = (titulo: string) => {
+  const handleActivarProtocolo = async (titulo: string) => {
     setIsEmergenciaActiva(true);
     setNombreProtocoloActivo(titulo);
     setShowProtocolos(false); // Ocultar la pantalla de selección para mostrar el pase de lista/emergencia
+
+    try {
+      await teacherService.createIncident({
+        title: `EMERGENCIA: ${titulo}`,
+        description: `Protocolo de seguridad "${titulo}" activado desde la aplicación móvil.`,
+        severity: titulo.includes('INCENDIO') || titulo.includes('TERREMOTO') ? 'CRITICA' : 'ALTA',
+        type: titulo,
+      });
+    } catch (err) {
+      console.warn('Error al registrar incidente en la API:', err);
+    }
+
     Alert.alert(
       'Protocolo Activado',
       `La alerta de "${titulo}" ha sido transmitida de inmediato al Centro de Coordinación y a las brigadas de emergencia del campus.\n\nPor favor, mantén la calma y sigue las instrucciones del personal oficial.`,
