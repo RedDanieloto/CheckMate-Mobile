@@ -18,7 +18,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useRole, Role } from '../../context/RoleContext';
 import { studentService } from '@/services/studentService';
+import { teacherService } from '@/services/teacherService';
 import { SubjectItem, SubjectDetail, AttendanceRecord } from '@/types/subject';
+import { TeacherScheduleItem } from '@/types/teacher';
 
 interface CalendarDay {
   dayName: string;
@@ -51,6 +53,7 @@ export default function CalendarScreen() {
   const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
   const [apiSubjects, setApiSubjects] = useState<SubjectItem[]>([]);
+  const [teacherSchedule, setTeacherSchedule] = useState<TeacherScheduleItem[]>([]);
   const [subjectDetail, setSubjectDetail] = useState<SubjectDetail | null>(null);
   const [attendanceHistory, setAttendanceHistory] = useState<AttendanceRecord[]>([]);
 
@@ -140,7 +143,7 @@ export default function CalendarScreen() {
     setIsSearchModalVisible(false);
   };
 
-  // Cargar materias reales de la API para estudiantes
+  // Cargar materias / horario real de la API según rol
   useEffect(() => {
     if (role === 'estudiante') {
       studentService.getSubjects()
@@ -149,7 +152,15 @@ export default function CalendarScreen() {
             setApiSubjects(data);
           }
         })
-        .catch(err => console.warn('Error al cargar materias:', err));
+        .catch(err => console.warn('Error al cargar materias del estudiante:', err));
+    } else if (role === 'profesor' || role === 'profesor_tutor') {
+      teacherService.getTodaySchedule()
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setTeacherSchedule(data);
+          }
+        })
+        .catch(err => console.warn('Error al cargar horario del profesor:', err));
     }
   }, [role]);
 
@@ -231,9 +242,37 @@ export default function CalendarScreen() {
     }
   };
 
-  // Datos mock de clases por rol y fecha
+  // Clases reales o mock según el rol y la fecha
   const getClasses = (currentRole: Role, date: string): ClassItem[] => {
     if (currentRole === 'administrador') return [];
+
+    if (currentRole === 'estudiante' && apiSubjects.length > 0) {
+      return apiSubjects.map((item, idx) => ({
+        id: String(item.id),
+        subjectId: item.id,
+        time: item.schedule || '07:00 - 09:00',
+        title: item.name,
+        location: 'Aula Asignada',
+        status: idx === 2 ? 'absent' : idx === 3 ? 'pending' : 'completed',
+        profesor: item.teacher?.full_name || 'Profesor Asignado',
+        correo: 'docente@checkmate.edu.mx',
+        agendaText: item.schedule || 'Horario Asignado',
+      }));
+    }
+
+    if ((currentRole === 'profesor' || currentRole === 'profesor_tutor') && teacherSchedule.length > 0) {
+      return teacherSchedule.map(item => ({
+        id: String(item.schedule_id),
+        subjectId: item.subject_id,
+        time: `${item.start_time} - ${item.end_time}`,
+        title: `${item.subject_name} (${item.group_name})`,
+        location: item.classroom || 'Aula Asignada',
+        status: item.session_open ? 'completed' : 'pending',
+        profesor: 'Docente (Tú)',
+        correo: 'profesor@checkmate.edu.mx',
+        agendaText: `${item.day} • ${item.start_time} - ${item.end_time}`,
+      }));
+    }
 
     // Clases del miércoles 3 de junio de 2026 (Mock principal de diseño con los 3 estados)
     if (date === '2026-06-03') {

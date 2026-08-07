@@ -49,6 +49,15 @@ export const ENDPOINTS = {
     JUSTIFICATIONS: '/alumno/justifications',
     SUBJECTS: '/alumno/subjects',
   },
+  PROFESOR: {
+    GROUPS: '/profesor/groups',
+    STUDENTS: '/profesor/students',
+    SCHEDULE: '/profesor/schedule',
+    SCHEDULE_TODAY: '/profesor/schedule/today',
+    SESSIONS: '/profesor/sessions',
+    INCIDENTS: '/profesor/incidents',
+    CLAIMS: '/profesor/claims',
+  },
 } as const;
 
 
