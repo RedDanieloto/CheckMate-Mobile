@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRole } from '../../context/RoleContext';
+import { teacherService } from '@/services/teacherService';
 
 interface Siniestro {
   id: string;
@@ -29,21 +30,31 @@ export default function HistorialSiniestrosScreen() {
   const { showHistorialSiniestros, setShowHistorialSiniestros, role } = useRole();
   const insets = useSafeAreaInsets();
 
-  const [siniestros, setSiniestros] = useState<Siniestro[]>([
-    {
-      id: '1',
-      titulo: 'BALACERA ESTUDIANTIL',
-      ubicacion: 'Poliforum UTT',
-      fecha: '03/06/2026',
-      diaSemana: 'Mie',
-      estado: 'FINALIZADO',
-      victimas: 1,
-      heridos: 2,
-      mensaje: 'Fuerte balacera',
-    },
-  ]);
-
+  const [siniestros, setSiniestros] = useState<Siniestro[]>([]);
   const [selectedSiniestro, setSelectedSiniestro] = useState<Siniestro | null>(null);
+
+  useEffect(() => {
+    if (showHistorialSiniestros) {
+      teacherService.getIncidents()
+        .then(incidents => {
+          if (Array.isArray(incidents) && incidents.length > 0) {
+            const mapped: Siniestro[] = incidents.map(inc => ({
+              id: String(inc.id),
+              titulo: inc.title?.toUpperCase() || 'INCIDENTE',
+              ubicacion: 'Campus General',
+              fecha: inc.created_at ? inc.created_at.split('T')[0] : '07/08/2026',
+              diaSemana: 'Hoy',
+              estado: inc.status === 'CERRADO' ? 'FINALIZADO' : 'EN CURSO',
+              victimas: 0,
+              heridos: 0,
+              mensaje: inc.description || 'Reporte registrado en la plataforma.',
+            }));
+            setSiniestros(mapped);
+          }
+        })
+        .catch(err => console.warn('Error al cargar historial de incidentes:', err));
+    }
+  }, [showHistorialSiniestros]);
 
   // Exclusión del módulo para roles que no sean el administrador
   if (!showHistorialSiniestros || role !== 'administrador') return null;
