@@ -18,6 +18,7 @@ import { useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useRole } from '@/context/RoleContext';
 import { studentService } from '@/services/studentService';
+import { teacherService } from '@/services/teacherService';
 import { StudentProfile } from '@/types/student';
 
 type Role = 'estudiante' | 'administrador' | 'profesor_tutor' | 'profesor';
@@ -69,14 +70,23 @@ export default function ProfileScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
+  const [teacherGroupsCount, setTeacherGroupsCount] = useState<number>(0);
+
   const fetchProfile = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await studentService.getProfile();
-      if (data) {
-        setStudentProfile(data);
-        if (data.photo && (data.photo.startsWith('http') || data.photo.startsWith('file'))) {
-          setProfilePhotoUri(data.photo);
+      if (currentRole === 'estudiante' || (currentRole as string) === 'alumno') {
+        const data = await studentService.getProfile();
+        if (data) {
+          setStudentProfile(data);
+          if (data.photo && (data.photo.startsWith('http') || data.photo.startsWith('file'))) {
+            setProfilePhotoUri(data.photo);
+          }
+        }
+      } else if (currentRole === 'profesor' || currentRole === 'profesor_tutor') {
+        const groups = await teacherService.getGroups();
+        if (Array.isArray(groups)) {
+          setTeacherGroupsCount(groups.length);
         }
       }
     } catch (error) {
@@ -213,7 +223,7 @@ export default function ProfileScreen() {
       ],
       stats: {
         leftLabel: 'Grupos Asignados',
-        leftValue: '5',
+        leftValue: String(teacherGroupsCount),
         rightLabel: 'Asistencia General',
         rightValue: '98%',
       },
