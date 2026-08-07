@@ -18,8 +18,8 @@ import { useRole } from '../../context/RoleContext';
 import { teacherService } from '@/services/teacherService';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const SWIPE_CONTAINER_WIDTH = SCREEN_WIDTH - 80; // Ancho disponible de la tarjeta
-const SWIPEABLE_WIDTH = SWIPE_CONTAINER_WIDTH - 64; // Rango de movimiento (descontando el botón de 48px y padding)
+const SWIPE_CONTAINER_WIDTH = SCREEN_WIDTH - 70;
+const SWIPEABLE_WIDTH = SWIPE_CONTAINER_WIDTH - 58;
 
 interface SwipeButtonProps {
   onActivate: () => void;
@@ -36,19 +36,20 @@ function SwipeButton({ onActivate, color, bgBar, label }: SwipeButtonProps) {
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event([null, { dx: pan }], {
-        useNativeDriver: false,
-      }),
+      onPanResponderMove: (e, gestureState) => {
+        if (gestureState.dx >= 0 && gestureState.dx <= SWIPEABLE_WIDTH) {
+          pan.setValue(gestureState.dx);
+        }
+      },
       onPanResponderRelease: (e, gestureState) => {
-        // Si se desliza más del 75% del recorrido, se activa el protocolo
-        if (gestureState.dx >= SWIPEABLE_WIDTH * 0.75) {
+        // Si se desliza más del 50% del recorrido, se activa el protocolo
+        if (gestureState.dx >= SWIPEABLE_WIDTH * 0.5) {
           Animated.timing(pan, {
             toValue: SWIPEABLE_WIDTH,
             duration: 150,
             useNativeDriver: false,
           }).start(() => {
             onActivate();
-            // Restablecer después de un pequeño retraso
             setTimeout(() => {
               Animated.spring(pan, {
                 toValue: 0,
@@ -57,7 +58,6 @@ function SwipeButton({ onActivate, color, bgBar, label }: SwipeButtonProps) {
             }, 800);
           });
         } else {
-          // Retroceder elásticamente si no completó el deslizamiento
           Animated.spring(pan, {
             toValue: 0,
             useNativeDriver: false,
@@ -67,7 +67,6 @@ function SwipeButton({ onActivate, color, bgBar, label }: SwipeButtonProps) {
     })
   ).current;
 
-  // Limitar el movimiento del botón para que no se salga de la barra
   const translateX = pan.interpolate({
     inputRange: [0, SWIPEABLE_WIDTH],
     outputRange: [0, SWIPEABLE_WIDTH],
@@ -83,7 +82,7 @@ function SwipeButton({ onActivate, color, bgBar, label }: SwipeButtonProps) {
         ]}
         {...panResponder.panHandlers}
       >
-        <Ionicons name="chevron-forward-outline" size={20} color={color} />
+        <Ionicons name="chevron-forward" size={24} color={color} />
       </Animated.View>
       <Text style={[styles.swipeText, { color }]}>{label}</Text>
     </View>
@@ -395,29 +394,29 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   swipeContainer: {
-    height: 48,
-    borderRadius: 24,
+    height: 56,
+    borderRadius: 28,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
     position: 'relative',
     justifyContent: 'center',
   },
   swipeHandle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
-    left: 4,
+    left: 5,
     zIndex: 2,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
   swipeText: {
     fontSize: 11,

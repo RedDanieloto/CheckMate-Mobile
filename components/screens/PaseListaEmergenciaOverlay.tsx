@@ -67,7 +67,7 @@ export default function PaseListaEmergenciaOverlay() {
                 id: String(s.id),
                 nombre: s.full_name || [s.first_name, s.first_surname].join(' '),
                 matricula: `MAT-${s.id}`,
-                estado: idx < 2 ? 'a_salvo' : 'pendiente',
+                estado: 'pendiente',
                 horaUltimaVez: '10:00 AM',
                 zonaRegistro: 'Campus General',
                 foto: '',
