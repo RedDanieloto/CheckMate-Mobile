@@ -8,7 +8,8 @@ export const studentService = {
    * Ruta backend: GET /api/v1/alumno/profile
    */
   async getProfile(): Promise<StudentProfile> {
-    const response = await apiClient.get<{ data: StudentProfile; message?: string }>(ENDPOINTS.ALUMNO.PROFILE);
-    return response.data || (response as unknown as StudentProfile);
+    const response = await apiClient.get<any>(ENDPOINTS.ALUMNO.PROFILE);
+    const profile = response?.data?.data || response?.data || response;
+    return profile as StudentProfile;
   },
 };

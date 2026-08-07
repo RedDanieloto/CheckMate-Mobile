@@ -70,11 +70,10 @@ export default function ProfileScreen() {
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const fetchProfile = useCallback(async () => {
-    if (currentRole !== 'estudiante') return;
     setIsLoading(true);
     try {
       const data = await studentService.getProfile();
-      if (data && (data.first_name || data.email)) {
+      if (data) {
         setStudentProfile(data);
         if (data.photo && (data.photo.startsWith('http') || data.photo.startsWith('file'))) {
           setProfilePhotoUri(data.photo);
@@ -221,7 +220,10 @@ export default function ProfileScreen() {
     },
   };
 
-  const data = roleData[currentRole];
+  const data =
+    studentProfile && (currentRole === 'estudiante' || (currentRole as string) === 'alumno')
+      ? buildStudentDataFromApi(studentProfile)
+      : (roleData[currentRole] || (studentProfile ? buildStudentDataFromApi(studentProfile) : roleData.estudiante));
 
   return (
     <View style={styles.container}>

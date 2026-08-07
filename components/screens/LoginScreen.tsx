@@ -17,6 +17,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authService } from '@/services/authService';
+import { useRole } from '@/context/RoleContext';
+
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -27,6 +29,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { setRole } = useRole();
   const insets = useSafeAreaInsets();
 
   const handleLogin = async () => {
@@ -39,11 +42,23 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     setErrorMessage(null);
 
     try {
-      await authService.login({
+      const response = await authService.login({
         email: email.trim(),
-        password: password,
+        password: password.trim(),
         device_name: 'checkmate-mobile',
       });
+
+      // Asignar el rol del usuario automáticamente en el contexto
+      const userRole = (response as any)?.data?.user?.role || response.user?.role;
+      if (userRole === 'alumno' || userRole === 'estudiante') {
+        setRole('estudiante');
+      } else if (userRole === 'administrator' || userRole === 'career_director') {
+        setRole('administrador');
+      } else if (userRole === 'profesor_tutor' || userRole === 'tutor_academico') {
+        setRole('profesor_tutor');
+      } else if (userRole === 'profesor') {
+        setRole('profesor');
+      }
 
       onLogin();
     } catch (error: any) {
