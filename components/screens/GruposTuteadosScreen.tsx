@@ -185,11 +185,22 @@ export default function GruposTuteadosScreen() {
     }
   };
 
-  const handleSendMail = (email: string, name: string) => {
-    const url = `mailto:${email}?subject=Reporte de Asistencias - CheckMate`;
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'No se pudo redirigir al cliente de correo.');
-    });
+  const handleSendMail = async (email?: string, name?: string) => {
+    if (!email) {
+      Alert.alert('Correo no disponible', 'El estudiante no cuenta con un correo registrado.');
+      return;
+    }
+    const mailUrl = `mailto:${email}?subject=Contacto%20CheckMate%20-%20${encodeURIComponent(name || 'Alumno')}`;
+    try {
+      const supported = await Linking.canOpenURL(mailUrl);
+      if (supported) {
+        await Linking.openURL(mailUrl);
+      } else {
+        Alert.alert('Correo del Alumno', `Correo institucional:\n${email}`);
+      }
+    } catch {
+      Alert.alert('Correo del Alumno', `Correo institucional:\n${email}`);
+    }
   };
 
   const activeGroupsList = apiGroups.length > 0 ? apiGroups : gruposTuteados;
@@ -244,14 +255,12 @@ export default function GruposTuteadosScreen() {
                 style={styles.card}
                 onPress={() => handleSelectGrupo(item)}
               >
-                <View style={styles.cardLeft}>
-                  <View style={styles.iconContainer}>
-                    <Ionicons name="people-outline" size={26} color="#6B7280" />
-                  </View>
-                  <View style={styles.cardInfo}>
-                    <Text style={styles.cardTitle}>{item.nombre}</Text>
-                    <Text style={styles.cardDesc}>{item.carrera}</Text>
-                  </View>
+                <View style={styles.iconContainer}>
+                  <Ionicons name="people-outline" size={24} color="#111E38" />
+                </View>
+                <View style={styles.cardInfo}>
+                  <Text style={styles.cardTitle}>{item.nombre}</Text>
+                  <Text style={styles.cardDesc}>{item.carrera}</Text>
                 </View>
               </Pressable>
             ))}
@@ -317,6 +326,9 @@ export default function GruposTuteadosScreen() {
 
               <Text style={styles.modalStudentName}>{selectedAlumno?.nombre}</Text>
               <Text style={styles.modalStudentSub}>Estudiante • Grupo {selectedGrupo?.nombre}</Text>
+              {!!selectedAlumno?.email && (
+                <Text style={styles.modalStudentEmail}>{selectedAlumno.email}</Text>
+              )}
             </View>
 
             {/* Contenido Blanco del Modal */}
@@ -578,6 +590,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#9CA3AF',
     textAlign: 'center',
+  },
+  modalStudentEmail: {
+    fontSize: 12,
+    color: '#D1D5DB',
+    textAlign: 'center',
+    marginTop: 2,
+    fontWeight: '500',
   },
   modalBody: {
     padding: 24,

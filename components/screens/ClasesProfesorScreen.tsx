@@ -188,11 +188,22 @@ export default function ClasesProfesorScreen() {
     }
   };
 
-  const handleSendMail = (email: string, name: string) => {
-    const url = `mailto:${email}?subject=Reporte de Asistencias - CheckMate`;
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'No se pudo redirigir al cliente de correo.');
-    });
+  const handleSendMail = async (email?: string, name?: string) => {
+    if (!email) {
+      Alert.alert('Correo no disponible', 'El estudiante no cuenta con un correo registrado.');
+      return;
+    }
+    const mailUrl = `mailto:${email}?subject=Contacto%20CheckMate%20-%20${encodeURIComponent(name || 'Alumno')}`;
+    try {
+      const supported = await Linking.canOpenURL(mailUrl);
+      if (supported) {
+        await Linking.openURL(mailUrl);
+      } else {
+        Alert.alert('Correo del Alumno', `Correo institucional:\n${email}`);
+      }
+    } catch {
+      Alert.alert('Correo del Alumno', `Correo institucional:\n${email}`);
+    }
   };
 
   const activeClasesList = apiClases.length > 0 ? apiClases : clasesProfesor;
@@ -319,6 +330,9 @@ export default function ClasesProfesorScreen() {
 
               <Text style={styles.modalStudentName}>{selectedAlumno?.nombre}</Text>
               <Text style={styles.modalStudentSub}>Estudiante • Grupo {selectedClase?.grupo}</Text>
+              {!!selectedAlumno?.email && (
+                <Text style={styles.modalStudentEmail}>{selectedAlumno.email}</Text>
+              )}
             </View>
 
             {/* Contenido Blanco del Modal */}
@@ -562,6 +576,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#9CA3AF',
     textAlign: 'center',
+  },
+  modalStudentEmail: {
+    fontSize: 12,
+    color: '#D1D5DB',
+    textAlign: 'center',
+    marginTop: 2,
+    fontWeight: '500',
   },
   modalBody: {
     padding: 24,
