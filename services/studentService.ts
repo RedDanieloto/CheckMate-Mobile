@@ -164,4 +164,18 @@ export const studentService = {
     const response = await apiClient.get<any>(endpoint);
     return (response?.data?.data || response?.data || response) as ClaimItem;
   },
+
+  /**
+   * 5. INCIDENTES ACTIVOS
+   * Ruta backend: GET /api/v1/alumno/incidents/active
+   */
+  async getActiveIncidents(): Promise<any[]> {
+    try {
+      const response = await apiClient.get<any>(ENDPOINTS.ALUMNO.INCIDENTS_ACTIVE);
+      const list = response?.data?.data || response?.data || response;
+      return Array.isArray(list) ? list : [];
+    } catch {
+      return [];
+    }
+  },
 };

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { teacherService } from '@/services/teacherService';
+import { studentService } from '@/services/studentService';
 
 export type Role = 'estudiante' | 'administrador' | 'profesor_tutor' | 'profesor';
 
@@ -137,7 +138,10 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const pollActiveIncident = async () => {
       try {
-        const incidents = await teacherService.getActiveIncidents();
+        const incidents = role === 'estudiante'
+          ? await studentService.getActiveIncidents()
+          : await teacherService.getActiveIncidents();
+
         if (Array.isArray(incidents) && incidents.length > 0) {
           const active = incidents[0];
           setIsEmergenciaActiva(true);
@@ -155,7 +159,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     pollActiveIncident();
     const interval = setInterval(pollActiveIncident, 3000);
     return () => clearInterval(interval);
-  }, [activeIncidentId]);
+  }, [role, activeIncidentId]);
 
   const marcarEstudianteASalvo = (id: string) => {
     setEstudiantesEmergencia(prev =>
