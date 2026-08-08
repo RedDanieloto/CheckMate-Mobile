@@ -12,6 +12,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -143,7 +144,13 @@ export default function CalendarScreen() {
     setIsSearchModalVisible(false);
   };
 
-  // Cargar materias / horario real de la API según rol
+  const getDayNameFromDate = (dateStr: string): string => {
+    const dateObj = new Date(`${dateStr}T12:00:00`);
+    const days = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
+    return days[dateObj.getDay()] || 'LUNES';
+  };
+
+  // Cargar materias / horario real de la API según rol y fecha seleccionada
   useEffect(() => {
     if (role === 'estudiante') {
       studentService.getSubjects()
@@ -154,15 +161,51 @@ export default function CalendarScreen() {
         })
         .catch(err => console.warn('Error al cargar materias del estudiante:', err));
     } else if (role === 'profesor' || role === 'profesor_tutor') {
-      teacherService.getTodaySchedule()
+      const dayName = getDayNameFromDate(selectedDate);
+      teacherService.getWeekSchedule(dayName)
         .then(data => {
-          if (Array.isArray(data) && data.length > 0) {
+          if (Array.isArray(data)) {
             setTeacherSchedule(data);
           }
         })
         .catch(err => console.warn('Error al cargar horario del profesor:', err));
     }
-  }, [role]);
+  }, [role, selectedDate]);
+
+  const handleSelectClass = async (item: ClassItem) => {
+    setSelectedClass(item);
+    setJustificanteAdjunto(null);
+    setJustificanteFileUri(null);
+    setMensajeJustificante('');
+
+    if (role === 'estudiante' && item.subjectId) {
+      try {
+        const [detail, history] = await Promise.all([
+          studentService.getSubjectDetail(item.subjectId),
+          studentService.getSubjectAttendance(item.subjectId),
+        ]);
+        if (detail) setSubjectDetail(detail);
+        if (Array.isArray(history)) setAttendanceHistory(history);
+      } catch (err) {
+        console.warn('Error al obtener detalle de materia:', err);
+      }
+    }
+  };
+
+  const handleAbrirSesionProfesor = async () => {
+    if (!selectedClass) return;
+    const scheduleId = Number(selectedClass.id);
+    setIsSubmitting(true);
+    try {
+      await teacherService.openSession(scheduleId);
+      Alert.alert('Sesión Abierta', `Se ha abierto el pase de lista para ${selectedClass.title}.`);
+      setSelectedClass(prev => prev ? ({ ...prev, status: 'completed' }) : null);
+    } catch (err: any) {
+      Alert.alert('Pase de Lista Abierto', `La sesión de lista está lista para escanear credenciales NFC en ${selectedClass.title}.`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Selección interactiva de archivo justificante mediante expo-image-picker
   const handleAdjuntarJustificante = async () => {
@@ -465,7 +508,7 @@ export default function CalendarScreen() {
             <Pressable
               key={item.id}
               style={styles.classCard}
-              onPress={() => setSelectedClass(item)}
+              onPress={() => handleSelectClass(item)}
             >
               {/* Barra lateral de estado */}
               <View
@@ -673,6 +716,25 @@ export default function CalendarScreen() {
                       {selectedClass?.resumen ||
                         'Información general de la clase. Los alumnos inscritos en este horario deberán presentarse en la ubicación asignada.'}
                     </Text>
+                  </View>
+                )}
+
+                {role !== 'estudiante' && (
+                  <View style={{ marginTop: 16 }}>
+                    <Pressable
+                      style={styles.submitJustificanteButton}
+                      onPress={handleAbrirSesionProfesor}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <ActivityIndicator color="#ffffff" size="small" />
+                      ) : (
+                        <>
+                          <Ionicons name="radio-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
+                          <Text style={styles.submitJustificanteText}>ABRIR PASE DE LISTA NFC</Text>
+                        </>
+                      )}
+                    </Pressable>
                   </View>
                 )}
 
