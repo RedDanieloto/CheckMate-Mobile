@@ -113,7 +113,7 @@ export default function ProfileScreen() {
               const students = await teacherService.getGroupStudents(g.id);
               if (Array.isArray(students) && students.length > 0) {
                 totalStudentsCount += students.length;
-                const groupAvg = students.reduce((acc: number, curr: any) => acc + (curr.attendance_percentage || 95), 0) / students.length;
+                const groupAvg = students.reduce((acc: number, curr: any) => acc + (typeof curr.attendance_percentage === 'number' ? curr.attendance_percentage : 100), 0) / students.length;
                 sumAttendancePercent += groupAvg * students.length;
               }
             } catch {}

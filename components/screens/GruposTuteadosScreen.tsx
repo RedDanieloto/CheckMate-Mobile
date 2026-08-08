@@ -83,7 +83,7 @@ export default function GruposTuteadosScreen() {
             matricula: `MAT-${s.id}`,
             email: s.email,
             estadoAcademico: 'REGULAR',
-            porcentajeAsistencia: 95,
+            porcentajeAsistencia: typeof s.attendance_percentage === 'number' ? Math.round(s.attendance_percentage) : 100,
             incidencias: [],
           }));
           setSelectedGrupo({
