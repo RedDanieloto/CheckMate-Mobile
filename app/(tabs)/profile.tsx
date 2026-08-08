@@ -113,8 +113,21 @@ export default function ProfileScreen() {
               const students = await teacherService.getGroupStudents(g.id);
               if (Array.isArray(students) && students.length > 0) {
                 totalStudentsCount += students.length;
-                const groupAvg = students.reduce((acc: number, curr: any) => acc + (typeof curr.attendance_percentage === 'number' ? curr.attendance_percentage : 100), 0) / students.length;
-                sumAttendancePercent += groupAvg * students.length;
+                let groupSum = 0;
+                for (const student of students) {
+                  try {
+                    const attRecords = await teacherService.getStudentAttendance(student.id);
+                    if (Array.isArray(attRecords) && attRecords.length > 0) {
+                      const present = attRecords.filter((a: any) => a.status === 'PRESENTE' || a.status === 'RETARDO').length;
+                      groupSum += Math.round((present / attRecords.length) * 100);
+                    } else {
+                      groupSum += 100;
+                    }
+                  } catch {
+                    groupSum += 100;
+                  }
+                }
+                sumAttendancePercent += groupSum;
               }
             } catch {}
           }
