@@ -3,7 +3,7 @@ import { StudentProfile } from '../types/student';
 import { SubjectItem, SubjectDetail, AttendanceRecord } from '../types/subject';
 import { JustificationItem } from '../types/justification';
 import { ClaimItem } from '../types/claim';
-import { apiClient } from './api';
+import { apiClient, getAuthToken } from './api';
 
 export const studentService = {
   /**
@@ -170,6 +170,7 @@ export const studentService = {
    * Ruta backend: GET /api/v1/alumno/incidents/active
    */
   async getActiveIncidents(): Promise<any[]> {
+    if (!getAuthToken()) return [];
     try {
       const response = await apiClient.get<any>(ENDPOINTS.ALUMNO.INCIDENTS_ACTIVE);
       const list = response?.data?.data || response?.data || response;

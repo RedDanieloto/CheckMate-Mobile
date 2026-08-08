@@ -11,7 +11,7 @@ import {
 } from '../types/teacher';
 import { AttendanceRecord } from '../types/subject';
 import { JustificationItem } from '../types/justification';
-import { apiClient } from './api';
+import { apiClient, getAuthToken } from './api';
 
 export const teacherService = {
   /**
@@ -152,10 +152,15 @@ export const teacherService = {
    * GET /api/v1/profesor/incidents/active
    */
   async getActiveIncidents(): Promise<TeacherIncident[]> {
-    const endpoint = `${ENDPOINTS.PROFESOR.INCIDENTS}/active`;
-    const response = await apiClient.get<any>(endpoint);
-    const list = response?.data?.data || response?.data || response;
-    return Array.isArray(list) ? list : [];
+    if (!getAuthToken()) return [];
+    try {
+      const endpoint = `${ENDPOINTS.PROFESOR.INCIDENTS}/active`;
+      const response = await apiClient.get<any>(endpoint);
+      const list = response?.data?.data || response?.data || response;
+      return Array.isArray(list) ? list : [];
+    } catch {
+      return [];
+    }
   },
 
   /**

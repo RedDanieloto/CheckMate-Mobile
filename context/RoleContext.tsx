@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { teacherService } from '@/services/teacherService';
 import { studentService } from '@/services/studentService';
+import { getAuthToken } from '@/services/api';
 
 export type Role = 'estudiante' | 'administrador' | 'profesor_tutor' | 'profesor';
 
@@ -137,6 +138,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const pollActiveIncident = async () => {
+      if (!getAuthToken()) return;
       try {
         const incidents = role === 'estudiante'
           ? await studentService.getActiveIncidents()
