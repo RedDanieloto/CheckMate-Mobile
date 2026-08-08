@@ -217,7 +217,7 @@ export const teacherService = {
   /**
    * PATCH /api/v1/profesor/incidents/{incident}/students
    */
-  async updateIncidentStudents(incidentId: number, studentStatuses: { student_id: number; present: boolean }[]): Promise<any> {
+  async updateIncidentStudents(incidentId: number, studentStatuses: { student_id: number; present?: boolean; status?: string }[]): Promise<any> {
     const endpoint = `${ENDPOINTS.PROFESOR.INCIDENTS}/${incidentId}/students`;
     const response = await apiClient.post<any>(endpoint, { students: studentStatuses });
     return response?.data?.data || response?.data || response;

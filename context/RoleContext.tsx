@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { teacherService } from '@/services/teacherService';
 
 export type Role = 'estudiante' | 'administrador' | 'profesor_tutor' | 'profesor';
 
@@ -42,6 +43,8 @@ interface RoleContextType {
   setIsEmergenciaActiva: (activa: boolean) => void;
   nombreProtocoloActivo: string;
   setNombreProtocoloActivo: (nombre: string) => void;
+  activeIncidentId: number | null;
+  setActiveIncidentId: (id: number | null) => void;
   alertaBusqueda: string | null;
   setAlertaBusqueda: (alerta: string | null) => void;
   estudiantesEmergencia: EstudianteEmergencia[];
@@ -127,8 +130,32 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   // Estados de Emergencia
   const [isEmergenciaActiva, setIsEmergenciaActiva] = useState(false);
   const [nombreProtocoloActivo, setNombreProtocoloActivo] = useState('');
+  const [activeIncidentId, setActiveIncidentId] = useState<number | null>(null);
   const [alertaBusqueda, setAlertaBusqueda] = useState<string | null>(null);
   const [estudiantesEmergencia, setEstudiantesEmergencia] = useState<EstudianteEmergencia[]>(estudiantesIniciales);
+
+  useEffect(() => {
+    const pollActiveIncident = async () => {
+      try {
+        const incidents = await teacherService.getActiveIncidents();
+        if (Array.isArray(incidents) && incidents.length > 0) {
+          const active = incidents[0];
+          setIsEmergenciaActiva(true);
+          setNombreProtocoloActivo(active.title || active.type || 'EMERGENCIA GENERAL');
+          setActiveIncidentId(active.id);
+        } else if (activeIncidentId !== null) {
+          setIsEmergenciaActiva(false);
+          setActiveIncidentId(null);
+        }
+      } catch (err) {
+        // Silencioso si no hay token/sesión abierta
+      }
+    };
+
+    pollActiveIncident();
+    const interval = setInterval(pollActiveIncident, 3000);
+    return () => clearInterval(interval);
+  }, [activeIncidentId]);
 
   const marcarEstudianteASalvo = (id: string) => {
     setEstudiantesEmergencia(prev =>
@@ -145,6 +172,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const finalizarEmergencia = () => {
     setIsEmergenciaActiva(false);
     setNombreProtocoloActivo('');
+    setActiveIncidentId(null);
     setAlertaBusqueda(null);
     setEstudiantesEmergencia(estudiantesIniciales);
   };
@@ -180,6 +208,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         setIsEmergenciaActiva,
         nombreProtocoloActivo,
         setNombreProtocoloActivo,
+        activeIncidentId,
+        setActiveIncidentId,
         alertaBusqueda,
         setAlertaBusqueda,
         estudiantesEmergencia,

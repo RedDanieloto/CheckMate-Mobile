@@ -11,16 +11,26 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRole } from '../../context/RoleContext';
 
+import { teacherService } from '@/services/teacherService';
+
 export default function EmergenciaEstudianteOverlay() {
-  const { isEmergenciaActiva, nombreProtocoloActivo, marcarEstudianteASalvo, role } = useRole();
+  const { isEmergenciaActiva, nombreProtocoloActivo, activeIncidentId, marcarEstudianteASalvo, role } = useRole();
   const insets = useSafeAreaInsets();
 
   // Si no está la emergencia activa o no es estudiante, no se muestra
   if (!isEmergenciaActiva || role !== 'estudiante') return null;
 
-  const handleReportarASalvo = () => {
-    // Marcamos al estudiante logueado (Diego Maradona, ID '6') como a salvo
-    marcarEstudianteASalvo('6');
+  const handleReportarASalvo = async () => {
+    if (activeIncidentId) {
+      try {
+        await teacherService.updateIncidentStudents(activeIncidentId, [
+          { student_id: 1, status: 'A_SALVO' }
+        ]);
+      } catch (err) {
+        console.warn('Error al reportar a salvo en la API:', err);
+      }
+    }
+    marcarEstudianteASalvo('1');
     Alert.alert(
       'Estado Reportado',
       'Has reportado tu estado como "A SALVO". Mantén la calma y sigue las instrucciones de los brigadistas.',
