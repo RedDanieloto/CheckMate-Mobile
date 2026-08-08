@@ -16,6 +16,7 @@ export interface TeacherStudentItem {
   email: string;
   nfc_uid?: string | null;
   photo?: string | null;
+  attendance_percentage?: number;
 }
 
 export interface TeacherScheduleItem {

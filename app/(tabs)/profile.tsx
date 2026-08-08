@@ -71,6 +71,7 @@ export default function ProfileScreen() {
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const [teacherGroupsCount, setTeacherGroupsCount] = useState<number>(0);
+  const [generalAttendancePercent, setGeneralAttendancePercent] = useState<number>(96);
 
   const fetchProfile = useCallback(async () => {
     setIsLoading(true);
@@ -83,10 +84,43 @@ export default function ProfileScreen() {
             setProfilePhotoUri(data.photo);
           }
         }
+        const subjects = await studentService.getSubjects();
+        if (Array.isArray(subjects) && subjects.length > 0) {
+          let totalOnTime = 0;
+          let totalAll = 0;
+          for (const sub of subjects) {
+            try {
+              const detail = await studentService.getSubjectDetail(sub.id);
+              if (detail && detail.attendance_summary) {
+                const { on_time, late, absent } = detail.attendance_summary;
+                totalOnTime += (on_time + late);
+                totalAll += (on_time + late + absent);
+              }
+            } catch {}
+          }
+          if (totalAll > 0) {
+            setGeneralAttendancePercent(Math.round((totalOnTime / totalAll) * 100));
+          }
+        }
       } else if (currentRole === 'profesor' || currentRole === 'profesor_tutor') {
         const groups = await teacherService.getGroups();
         if (Array.isArray(groups)) {
           setTeacherGroupsCount(groups.length);
+          let totalStudentsCount = 0;
+          let sumAttendancePercent = 0;
+          for (const g of groups) {
+            try {
+              const students = await teacherService.getGroupStudents(g.id);
+              if (Array.isArray(students) && students.length > 0) {
+                totalStudentsCount += students.length;
+                const groupAvg = students.reduce((acc: number, curr: any) => acc + (curr.attendance_percentage || 95), 0) / students.length;
+                sumAttendancePercent += groupAvg * students.length;
+              }
+            } catch {}
+          }
+          if (totalStudentsCount > 0) {
+            setGeneralAttendancePercent(Math.round(sumAttendancePercent / totalStudentsCount));
+          }
         }
       }
     } catch (error) {
@@ -158,7 +192,7 @@ export default function ProfileScreen() {
         leftLabel: 'Faltas en Total',
         leftValue: '0',
         rightLabel: 'Asistencia General',
-        rightValue: '100%',
+        rightValue: `${generalAttendancePercent}%`,
       },
     };
   };
@@ -180,7 +214,7 @@ export default function ProfileScreen() {
             leftLabel: 'Faltas en Total',
             leftValue: '2',
             rightLabel: 'Porcentaje de Asistencias',
-            rightValue: '98%',
+            rightValue: `${generalAttendancePercent}%`,
           },
         },
     administrador: {
@@ -194,7 +228,7 @@ export default function ProfileScreen() {
         leftLabel: 'Alumnos Totales',
         leftValue: '2123',
         rightLabel: 'Asistencia General',
-        rightValue: '98%',
+        rightValue: `${generalAttendancePercent}%`,
       },
     },
     profesor_tutor: {
@@ -210,7 +244,7 @@ export default function ProfileScreen() {
         leftLabel: 'Alumnos Tutados',
         leftValue: '31',
         rightLabel: 'Asistencia General',
-        rightValue: '98%',
+        rightValue: `${generalAttendancePercent}%`,
       },
     },
     profesor: {
@@ -225,7 +259,7 @@ export default function ProfileScreen() {
         leftLabel: 'Grupos Asignados',
         leftValue: String(teacherGroupsCount),
         rightLabel: 'Asistencia General',
-        rightValue: '98%',
+        rightValue: `${generalAttendancePercent}%`,
       },
     },
   };

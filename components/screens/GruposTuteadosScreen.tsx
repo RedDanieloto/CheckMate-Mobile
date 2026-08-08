@@ -214,10 +214,23 @@ export default function GruposTuteadosScreen() {
           teacherService.getStudentAttendance(Number(student.id)),
           teacherService.getStudentJustifications(Number(student.id)),
         ]);
+        let calculatedPercentage = 100;
+        if (Array.isArray(attendance) && attendance.length > 0) {
+          const presentCount = attendance.filter((a: any) => a.status === 'PRESENTE' || a.status === 'RETARDO' || a.status === 'PRESENT').length;
+          calculatedPercentage = Math.round((presentCount / attendance.length) * 100);
+        } else if (Array.isArray(justifications) && justifications.length > 0) {
+          const faltas = justifications.length;
+          calculatedPercentage = Math.max(70, 100 - (faltas * 5));
+        } else if (detail && typeof detail.attendance_percentage === 'number') {
+          calculatedPercentage = Math.round(detail.attendance_percentage);
+        }
+
         setSelectedAlumno(prev => prev ? ({
           ...prev,
           nombre: detail.full_name || prev.nombre,
           email: detail.email || prev.email,
+          porcentajeAsistencia: calculatedPercentage,
+          estadoAcademico: calculatedPercentage >= 80 ? 'REGULAR' : 'CONDICIONAL',
           incidencias: Array.isArray(justifications) ? justifications.map(j => ({
             materia: j.subject?.name || 'Falta en Asignatura',
             tipo: j.status === 'APROBADO' ? 'Inasistencia justificada' : 'Inasistencia injustificada',
